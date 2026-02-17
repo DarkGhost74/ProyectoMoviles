@@ -1,98 +1,177 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import React from "react";
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+const PRIMARY = "#F5C518"; // amarillo
+const BACKGROUND = "#1E2A38"; // azul oscuro
+const CARD_BG = "#223246";
 
-export default function HomeScreen() {
+type MenuCardProps = {
+  icon: React.ReactNode;
+  label: string;
+};
+
+const MenuCard: React.FC<MenuCardProps> = ({ icon, label }) => {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <TouchableOpacity style={styles.card} activeOpacity={0.8}>
+      {icon}
+      <Text style={styles.cardText}>{label}</Text>
+    </TouchableOpacity>
+  );
+};
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+export default function CarShopScreen() {
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.greeting}>
+            Hola, <Text style={styles.bold}>Chalino Sánchez</Text>
+          </Text>
+          <Text style={styles.title}>Car Shop Service</Text>
+          <View style={styles.divider} />
+        </View>
+
+        {/* Grid */}
+        <View style={styles.grid}>
+          <MenuCard
+            icon={<Feather name="tool" size={40} color={PRIMARY} />}
+            label="ÓRDENES DE SERVICIO"
+          />
+
+          <MenuCard
+            icon={<Feather name="user" size={40} color={PRIMARY} />}
+            label="CLIENTES"
+          />
+
+          <MenuCard
+            icon={<Feather name="archive" size={40} color={PRIMARY} />}
+            label="HISTORIAL"
+          />
+
+          <MenuCard
+            icon={<Feather name="dollar-sign" size={40} color={PRIMARY} />}
+            label="PAGOS"
+          />
+
+          <MenuCard
+            icon={
+              <MaterialCommunityIcons name="disc" size={40} color={PRIMARY} />
+            }
+            label="PIEZAS"
+          />
+
+          <MenuCard
+            icon={<Ionicons name="bar-chart" size={40} color={PRIMARY} />}
+            label="DASHBOARD"
+          />
+
+          <MenuCard
+            icon={<Feather name="settings" size={40} color={PRIMARY} />}
+            label="CONFIGURACIÓN"
+          />
+        </View>
+      </ScrollView>
+
+      {/* Bottom Navigation */}
+      <View style={styles.bottomBar}>
+        <Ionicons name="home-outline" size={26} color={PRIMARY} />
+        <Ionicons name="search-outline" size={26} color="#9AA4B2" />
+
+        {/* Floating Button */}
+        <View style={styles.fabContainer}>
+          <TouchableOpacity style={styles.fab}>
+            <Ionicons name="add" size={30} color="#000" />
+          </TouchableOpacity>
+        </View>
+
+        <Ionicons name="notifications-outline" size={26} color="#9AA4B2" />
+        <Ionicons name="menu-outline" size={26} color="#9AA4B2" />
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: BACKGROUND,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 50,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  greeting: {
+    color: "#C5CDD8",
+    fontSize: 16,
+  },
+  bold: {
+    fontWeight: "bold",
+    color: "#FFFFFF",
+  },
+  title: {
+    color: PRIMARY,
+    fontSize: 32,
+    fontWeight: "bold",
+    marginTop: 10,
+  },
+  divider: {
+    height: 2,
+    backgroundColor: PRIMARY,
+    marginTop: 10,
+    width: "100%",
+  },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    padding: 20,
+  },
+  card: {
+    width: "48%",
+    aspectRatio: 1,
+    backgroundColor: CARD_BG,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: PRIMARY,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  cardText: {
+    color: PRIMARY,
+    textAlign: "center",
+    marginTop: 15,
+    fontWeight: "bold",
+    letterSpacing: 1,
+  },
+  bottomBar: {
+    height: 70,
+    backgroundColor: "#0F1A28",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+  },
+  fabContainer: {
+    position: "absolute",
+    alignSelf: "center",
+    bottom: 25,
+  },
+  fab: {
+    width: 65,
+    height: 65,
+    borderRadius: 35,
+    backgroundColor: PRIMARY,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 6,
   },
 });
