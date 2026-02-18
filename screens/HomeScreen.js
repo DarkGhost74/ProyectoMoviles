@@ -15,6 +15,7 @@ import {
 } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
+import BottomNav from "../components/BottomNav";
 
 const HomeScreen = ({ navigation }) => {
     return (
@@ -38,7 +39,9 @@ const ScreenContent = ({ navigation }) => {
                     {/* HEADER */}
                     <View style={styles.header}>
                         <View style={styles.profileRow}>
-                            <View style={styles.avatar} />
+                            <View style={styles.avatar}>
+                                <Feather name="user" size={30} color="black" />
+                            </View>
                             <View>
                                 <Text style={styles.greeting}>
                                     BUENOS DÍAS,
@@ -117,24 +120,7 @@ const ScreenContent = ({ navigation }) => {
                 </ScrollView>
 
                 {/* BOTTOM NAV */}
-                <View
-                    style={[styles.bottomBar, { bottom: insets.bottom || 0 }]}
-                >
-                    <Ionicons name="grid-outline" size={24} color="#FFD43B" />
-                    <Pressable onPress={() => navigation.navigate("Orders")}>
-                        <Ionicons
-                            name="clipboard-outline"
-                            size={24}
-                            color="#888"
-                        />
-                    </Pressable>
-                    <Pressable onPress={() => navigation.navigate("Agenda")}>
-                        <Feather name="calendar" size={24} color="#888" />
-                    </Pressable>
-                    <Pressable onPress={() => navigation.navigate("Orders")}>
-                        <Feather name="archive" size={24} color="#888" />
-                    </Pressable>
-                </View>
+                <BottomNav active="Home" />
             </SafeAreaView>
         </>
     );
@@ -193,6 +179,8 @@ const styles = StyleSheet.create({
         borderRadius: 24,
         backgroundColor: "#FFD43B",
         marginRight: 12,
+        justifyContent: "center",
+        alignItems: "center",
     },
 
     greeting: {
@@ -404,28 +392,6 @@ const styles = StyleSheet.create({
     price: {
         color: "#fff",
         fontWeight: "600",
-    },
-
-    bottomBar: {
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: "#15181E",
-        height: 70,
-        flexDirection: "row",
-        justifyContent: "space-around",
-        alignItems: "center",
-    },
-
-    scanBtn: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: "#FFD43B",
-        justifyContent: "center",
-        alignItems: "center",
-        marginTop: -30,
     },
 
     rowBetween: {
