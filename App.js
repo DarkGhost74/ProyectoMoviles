@@ -6,6 +6,7 @@ import * as NavigationBar from "expo-navigation-bar";
 import HomeScreen from "./screens/HomeScreen";
 import OrdersScreen from "./screens/OrdersScreen";
 import AgendaScreen from "./screens/AgendaScreen";
+import OrderDetailsScreen from "./screens/OrderDetailsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -35,6 +36,11 @@ export default function App() {
                     name="Agenda"
                     component={AgendaScreen}
                     options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="OrderDetails"
+                    component={OrderDetailsScreen}
+                    options={{ headerShown: false}}
                 />
             </Stack.Navigator>
         </NavigationContainer>

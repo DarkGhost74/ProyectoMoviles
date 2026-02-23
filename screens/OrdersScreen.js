@@ -75,7 +75,7 @@ export default function OrdersScreen({ navigation }) {
                             </View>
                         </View>
 
-                        <TouchableOpacity style={styles.primaryButton}>
+                        <TouchableOpacity style={styles.primaryButton} onPress={() => navigation.navigate("OrderDetails")} >
                             <Text style={styles.primaryButtonText}>
                                 Ver detalles
                             </Text>
