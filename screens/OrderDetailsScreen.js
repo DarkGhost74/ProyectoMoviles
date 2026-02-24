@@ -7,23 +7,21 @@ import {
     TouchableOpacity,
     Image,
     Pressable,
-    Button,
 } from "react-native";
-import {
-    Ionicons,
-    MaterialCommunityIcons,
-    Feather,
-    Octicons,
-} from "@expo/vector-icons";
 import {
     SafeAreaProvider,
     SafeAreaView,
     useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import BottomNav from "../components/BottomNav";
+import { useNavigation } from "@react-navigation/native"; //NAVEGACION
 
-export default function OrdersScreen({ navigation }) {
+
+
+export default function OrderDetailsScreen() {
+    const navigation = useNavigation();
     const insets = useSafeAreaInsets();
     return (
         <SafeAreaProvider>
@@ -32,127 +30,85 @@ export default function OrdersScreen({ navigation }) {
                 style={[styles.container, { paddingBottom: insets.bottom }]}
                 edges={["top", "bottom"]}
             >
-                <ScrollView showsVerticalScrollIndicator={false}>
-                    <Text
-                        style={{
-                            fontSize: 24,
-                            fontWeight: "bold",
-                            margin: 16,
-                            color: "#fff",
-                        }}
-                    >
-                        Gestor de Ordenes
-                    </Text>
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            marginBottom: 10,
-                        }}
-                    >
-                        <Octicons name="dot-fill" size={24} color="#FFD43B" />
-                        <Text
-                            style={{
-                                color: "#FFD43B",
-                                marginLeft: 8,
-                                fontSize: 18,
-                                fontWeight: "bold",
-                            }}
+                <View style={{
+                    flexDirection:"row",
+                    alignItems: "center",
+                    paddingHorizontal: 15,
+                    paddingVertical: 10,
+                    backgroundColor: "#0B0F14",
+                }}>
+                    <Pressable 
+                        onPress={() => navigation.goBack()}
+                        hitSlop={12}
+                        style={{ padding: 1}}
                         >
-                            Orden actual
-                        </Text>
-                    </View>
-                    <View style={styles.card}>
+                        <MaterialCommunityIcons
+                            name="arrow-left"
+                            size={24}
+                            color={"#ffff"}                       
+                        />           
+                    </Pressable>
+                    <Text
+                    style={{
+                        color: "#ffff",
+                        fontSize: 24,
+                        fontWeight: "bold",
+                        marginLeft: 20,
+
+                    }}                  //PONER EL NUMERO DE ORDEM               
+                    >
+                        Orden #
+
+                    </Text>                    
+                </View>
+
+                <ScrollView>
+                    <View
+                        style={[
+                            styles.card,
+                            { borderColor: "#FFD43B" },
+                            { borderWidth: 1}
+                        ]}
+                    >
                         <View style={styles.rowBetween}>
                             <View>
                                 <Text style={styles.carTitle}>Honda Civic</Text>
-                                <Text style={styles.subText}>
-                                    Placas: AB123D • Gris • 2027
+                                <View style={{
+                                    flexDirection: "row"}}>                                    
+                                    <Text style={styles.subText}>SJD739A</Text>
+                                    <Text style={styles.subText}>   Gris</Text>
+                                </View>
+                                
+                            </View>
+                            <View style={{
+                                alignItems: "flex-end"
+                            }}>
+                                <Text style={{
+                                    fontSize: 15,
+                                    color: "rgba(255,255,255,0.6)",
+                                    letterSpacing: 1
+                                }}>
+                                    Fecha Estimada                
                                 </Text>
+                                <Text style={{
+                                    color: "#FFD43B"
+                                }}>
+                                    28/02/26</Text>
                             </View>
-                            <View style={styles.badge}>
-                                <Text style={styles.badgeText}>EN PROCESO</Text>
-                            </View>
+
                         </View>
 
-                        <TouchableOpacity style={styles.primaryButton} onPress={() => navigation.navigate("OrderDetails")} >
-                            <Text style={styles.primaryButtonText}>
-                                Ver detalles
-                            </Text>
-                            <MaterialCommunityIcons
-                                name="arrow-right"
-                                size={20}
-                                color="black"
-                            />
-                        </TouchableOpacity>
                     </View>
+                    
 
-                    {/* UPCOMING */}
-                    <Text style={styles.sectionLabel}>PRÓXIMAS ORDENES</Text>
-
-                    {renderUpcoming(
-                        "Ford F-150",
-                        "Diagnostico de motor • PL-9988",
-                        "HOY, 02:30 PM",
-                        "PENDIENTE",
-                    )}
-                    {renderUpcoming(
-                        "Toyota RAV4",
-                        "Servicio de mantenimiento • TX-5544",
-                        "MAÑANA, 09:00 AM",
-                        "PROGRAMADO",
-                    )}
-                    {renderUpcoming(
-                        "Toyota RAV4",
-                        "Servicio de mantenimiento • TX-5544",
-                        "MAÑANA, 09:00 AM",
-                        "PROGRAMADO",
-                    )}
-                    {renderUpcoming(
-                        "Toyota RAV4",
-                        "Servicio de mantenimiento • TX-5544",
-                        "MAÑANA, 09:00 AM",
-                        "PROGRAMADO",
-                    )}
-                    {renderUpcoming(
-                        "Toyota RAV4",
-                        "Servicio de mantenimiento • TX-5544",
-                        "MAÑANA, 09:00 AM",
-                        "PROGRAMADO",
-                    )}
-                    {renderUpcoming(
-                        "Toyota RAV4",
-                        "Servicio de mantenimiento • TX-5544",
-                        "MAÑANA, 09:00 AM",
-                        "PROGRAMADO",
-                    )}
                 </ScrollView>
-                <BottomNav active="Orders" />
+
+
             </SafeAreaView>
+
         </SafeAreaProvider>
-    );
-}
 
-function renderUpcoming(title, subtitle, time, status) {
-    return (
-        <View style={styles.taskCard}>
-            <View style={styles.iconCircleDark}>
-                <Feather name="clock" size={16} color="#FFD43B" />
-            </View>
-
-            <View style={{ flex: 1 }}>
-                <Text style={styles.carTitle}>{title}</Text>
-                <Text style={styles.subText}>{subtitle}</Text>
-            </View>
-
-            <View style={{ alignItems: "flex-end" }}>
-                <Text style={styles.timeText}>{time}</Text>
-                <View style={styles.statusBadge}>
-                    <Text style={styles.statusText}>{status}</Text>
-                </View>
-            </View>
-        </View>
-    );
+  );
 }
 
 const styles = StyleSheet.create({
@@ -181,7 +137,7 @@ const styles = StyleSheet.create({
     },
     carTitle: {
         color: "#fff",
-        fontSize: 16,
+        fontSize: 20,
         fontWeight: "600",
     },
     subText: {

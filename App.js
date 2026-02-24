@@ -6,11 +6,24 @@ import * as NavigationBar from "expo-navigation-bar";
 import HomeScreen from "./screens/HomeScreen";
 import OrdersScreen from "./screens/OrdersScreen";
 import AgendaScreen from "./screens/AgendaScreen";
+
+
 import PastRepairsScreen from "./screens/PastRepairsScreen";
+
+import OrderDetailsScreen from "./screens/OrderDetailsScreen";
+
+import { app } from "./firebaseConfig";
+
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
     useEffect(() => {
+        // Firebase connection
+        if (app) {
+            console.log("Firebase successfully connected!");
+            console.log("Proyect initialized as:", app.name);
+        }
         // Fondo de la barra
         NavigationBar.setBackgroundColorAsync("#000000");
 
@@ -37,10 +50,17 @@ export default function App() {
                     options={{ headerShown: false }}
                 />
                 <Stack.Screen
+
                      name="PastRepairs"
                      component={PastRepairsScreen}
                      options={{ headerShown: false }}
 />
+                <Stack.Screen
+                    name="OrderDetails"
+                    component={OrderDetailsScreen}
+                    options={{ headerShown: false}}
+                />
+
             </Stack.Navigator>
         </NavigationContainer>
     );
