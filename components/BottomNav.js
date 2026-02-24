@@ -36,13 +36,13 @@ export default function BottomNav({ active }) {
                 />
             </Pressable>
 
-            <Pressable onPress={() => navigation.navigate("Archive")}>
-                <Feather
-                    name="archive"
-                    size={24}
-                    color={active === "Archive" ? activeColor : inactiveColor}
-                />
-            </Pressable>
+       <Pressable onPress={() => navigation.navigate("PastRepairs")}>
+    <Feather
+        name="archive"
+        size={24}
+        color={active === "PastRepairs" ? activeColor : inactiveColor}
+    />
+</Pressable>
         </View>
     );
 }

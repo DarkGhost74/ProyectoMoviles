@@ -1,376 +1,263 @@
-import { View, Text, Button } from "react-native";
-
-export default function ProfileScreen({ navigation }) {
-    return (
-        <View>
-            <Text>Agenda Screen</Text>
-
-            <Button title="Regresar" onPress={() => navigation.goBack()} />
-        </View>
-    );
-}
-/*
-import React from "react";
+import React, { useState } from "react";
 import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    TouchableOpacity,
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Pressable,
 } from "react-native";
-import { MaterialCommunityIcons, Feather } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
+import BottomNav from "../components/BottomNav";
 
-export default function OrdersScreen() {
-    return (
-        <View style={styles.container}>
-            <ScrollView showsVerticalScrollIndicator={false}>
-                {/* HEADER }
-                <View style={styles.header}>
-                    <Text style={styles.title}>Orders Management</Text>
-                    <View style={styles.searchBtn}>
-                        <Feather name="search" size={20} color="#FFD43B" />
-                    </View>
-                </View>
+const months = [
+  "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+  "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+];
 
-                {/* CURRENT ORDER }
-                <Text style={styles.sectionLabel}>CURRENT ORDER</Text>
+export default function AgendaScreen() {
 
-                <View style={styles.card}>
-                    <View style={styles.rowBetween}>
-                        <View>
-                            <Text style={styles.carTitle}>Honda Civic</Text>
-                            <Text style={styles.subText}>
-                                Plate: ABC-1234 • Silver
-                            </Text>
-                        </View>
-                        <View style={styles.badge}>
-                            <Text style={styles.badgeText}>IN PROGRESS</Text>
-                        </View>
-                    </View>
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [selectedDay, setSelectedDay] = useState(new Date().getDate());
+  const [showCalendar, setShowCalendar] = useState(true);
 
-                    <View style={styles.progressHeader}>
-                        <Text style={styles.progressLabel}>
-                            BRAKE PAD REPLACEMENT
-                        </Text>
-                        <Text style={styles.progressPercent}>
-                            65% COMPLETE
-                        </Text>
-                    </View>
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-                    <View style={styles.progressBar}>
-                        <View style={styles.progressFill} />
-                    </View>
+  const repairs = {
+    5: [
+      { time: "09:00 AM", car: "Toyota Corolla", plate: "ABC-1234", service: "Oil Change & Filter" },
+      { time: "11:30 AM", car: "Honda Civic", plate: "XYZ-9876", service: "Brake Pad Replacement" }
+    ],
+    10: [
+      { time: "02:00 PM", car: "Ford F-150", plate: "TRK-5512", service: "Wheel Alignment" }
+    ]
+  };
 
-                    <TouchableOpacity style={styles.primaryButton}>
-                        <Text style={styles.primaryButtonText}>
-                            View Details →
-                        </Text>
-                    </TouchableOpacity>
-                </View>
+  const goNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear(currentYear + 1);
+    } else {
+      setCurrentMonth(currentMonth + 1);
+    }
+    setSelectedDay(1);
+  };
 
-                {/* NEW ASSIGNMENTS }
-                <View style={styles.rowBetween}>
-                    <Text style={styles.sectionLabel}>NEW ASSIGNMENTS</Text>
-                    <View style={styles.priorityBadge}>
-                        <Text style={styles.priorityText}>2 PRIORITY</Text>
-                    </View>
-                </View>
+  const goPrevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(currentYear - 1);
+    } else {
+      setCurrentMonth(currentMonth - 1);
+    }
+    setSelectedDay(1);
+  };
 
-                <View style={styles.assignmentCard}>
-                    <View style={styles.iconCircle}>
-                        <MaterialCommunityIcons
-                            name="wrench"
-                            size={18}
-                            color="#FFD43B"
-                        />
-                    </View>
+  return (
+    <>
+      <StatusBar style="light" />
+      <SafeAreaView style={styles.container} edges={["top"]}>
 
-                    <View style={{ flex: 1 }}>
-                        <Text style={styles.carTitle}>Tesla Model 3</Text>
-                        <Text style={styles.subText}>
-                            Suspension Calibration
-                        </Text>
-                    </View>
+        <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
 
-                    <TouchableOpacity style={styles.smallButton}>
-                        <Text style={styles.smallButtonText}>START</Text>
-                    </TouchableOpacity>
-                </View>
+          {/* HEADER */}
+          <View style={styles.headerRow}>
+            <Text style={styles.headerTitle}>Schedule</Text>
+            <Pressable style={styles.plusButton}>
+              <Feather name="plus" size={20} color="#FFD43B" />
+            </Pressable>
+          </View>
 
-                {/* UPCOMING }
-                <Text style={styles.sectionLabel}>UPCOMING TASKS</Text>
+          {/* Navegacion del mes */}
+          <View style={styles.monthRow}>
+            <Pressable onPress={goPrevMonth}>
+              <Feather name="chevron-left" size={22} color="#fff" />
+            </Pressable>
 
-                {renderUpcoming(
-                    "Ford F-150",
-                    "Engine Diagnostics • PL-9988",
-                    "TODAY, 02:30 PM",
-                    "PENDING"
-                )}
+            <Pressable onPress={() => setShowCalendar(!showCalendar)}>
+              <Text style={styles.monthText}>
+                {months[currentMonth]} {currentYear}
+              </Text>
+            </Pressable>
 
-                {renderUpcoming(
-                    "Toyota RAV4",
-                    "Transmission Flush • TX-5544",
-                    "TOMORROW, 09:00 AM",
-                    "SCHEDULED"
-                )}
+            <Pressable onPress={goNextMonth}>
+              <Feather name="chevron-right" size={22} color="#fff" />
+            </Pressable>
+          </View>
 
-                {/* COMPLETED }
-                <Text style={styles.sectionLabel}>COMPLETED TASKS</Text>
+          {/* CALENDAR GRID */}
+          {showCalendar && (
+            <View style={styles.calendarGrid}>
+              {[...Array(daysInMonth)].map((_, i) => {
+                const day = i + 1;
+                const isSelected = selectedDay === day;
 
-                {renderCompleted("BMW X5", "OIL CHANGE • DONE 08:15 AM", "$124.00")}
-                {renderCompleted("Audi A4", "AC RECHARGE • DONE YESTERDAY", "$89.50")}
-
-                <View style={{ height: 120 }} />
-            </ScrollView>
-
-            {/* FLOATING BUTTON }
-            <TouchableOpacity style={styles.fab}>
-                <Feather name="plus" size={26} color="#000" />
-            </TouchableOpacity>
-        </View>
-    );
-}
-
-function renderUpcoming(title: string, subtitle: string, time: string, status: string) {
-    return (
-        <View style={styles.taskCard}>
-            <View style={styles.iconCircleDark}>
-                <Feather name="clock" size={16} color="#FFD43B" />
+                return (
+                  <Pressable
+                    key={day}
+                    style={[
+                      styles.dayBox,
+                      isSelected && styles.selectedDay
+                    ]}
+                    onPress={() => {
+                      setSelectedDay(day);
+                      setShowCalendar(false);
+                    }}
+                  >
+                    <Text style={[
+                      styles.dayText,
+                      isSelected && { color: "#000" }
+                    ]}>
+                      {day}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
+          )}
 
-            <View style={{ flex: 1 }}>
-                <Text style={styles.carTitle}>{title}</Text>
-                <Text style={styles.subText}>{subtitle}</Text>
-            </View>
+         
+          <Text style={styles.repairsTitle}>
+            Ordenes para {months[currentMonth]} {selectedDay}
+          </Text>
 
-            <View>
-                <Text style={styles.timeText}>{time}</Text>
-                <View style={styles.statusBadge}>
-                    <Text style={styles.statusText}>{status}</Text>
+      
+          {(repairs[selectedDay] || []).length === 0 ? (
+            <Text style={styles.noRepairs}>
+              No hay ordenes programadas para este día.
+            </Text>
+          ) : (
+            repairs[selectedDay].map((item, index) => (
+              <View key={index} style={styles.card}>
+                <Text style={styles.time}>{item.time}</Text>
+                <View style={{ marginLeft: 10 }}>
+                  <Text style={styles.car}>{item.car}</Text>
+                  <Text style={styles.sub}>
+                    {item.service}
+                  </Text>
+                  <Text style={styles.plate}>
+                    {item.plate}
+                  </Text>
                 </View>
-            </View>
-        </View>
-    );
-}
+              </View>
+            ))
+          )}
 
-function renderCompleted(title: string, subtitle: string, price: string) {
-    return (
-        <View style={styles.taskCard}>
-            <View style={styles.completedCircle}>
-                <Feather name="check" size={16} color="#000" />
-            </View>
+        </ScrollView>
 
-            <View style={{ flex: 1 }}>
-                <Text style={styles.carTitle}>{title}</Text>
-                <Text style={styles.subText}>{subtitle}</Text>
-            </View>
+        <BottomNav active="Agenda" />
 
-            <Text style={styles.price}>{price}</Text>
-        </View>
-    );
+      </SafeAreaView>
+    </>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#0F1115",
-        paddingHorizontal: 20,
-        paddingTop: 60,
-    },
-    header: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 30,
-    },
-    title: {
-        color: "#fff",
-        fontSize: 22,
-        fontWeight: "700",
-    },
-    searchBtn: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: "#1A1D24",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    sectionLabel: {
-        color: "#8B90A0",
-        fontSize: 13,
-        letterSpacing: 1,
-        marginBottom: 15,
-        marginTop: 10,
-    },
-    card: {
-        backgroundColor: "#1A1D24",
-        borderRadius: 20,
-        padding: 20,
-        marginBottom: 25,
-    },
-    rowBetween: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-    },
-    carTitle: {
-        color: "#fff",
-        fontSize: 16,
-        fontWeight: "600",
-    },
-    subText: {
-        color: "#8B90A0",
-        fontSize: 13,
-        marginTop: 4,
-    },
-    badge: {
-        backgroundColor: "rgba(255,212,59,0.15)",
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 20,
-    },
-    badgeText: {
-        color: "#FFD43B",
-        fontSize: 12,
-        fontWeight: "600",
-    },
-    progressHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginTop: 20,
-    },
-    progressLabel: {
-        color: "#8B90A0",
-        fontSize: 12,
-    },
-    progressPercent: {
-        color: "#FFD43B",
-        fontSize: 12,
-        fontWeight: "600",
-    },
-    progressBar: {
-        height: 8,
-        backgroundColor: "#2A2E38",
-        borderRadius: 10,
-        marginTop: 10,
-    },
-    progressFill: {
-        width: "65%",
-        height: 8,
-        backgroundColor: "#FFD43B",
-        borderRadius: 10,
-    },
-    primaryButton: {
-        backgroundColor: "#FFD43B",
-        paddingVertical: 14,
-        borderRadius: 15,
-        alignItems: "center",
-        marginTop: 20,
-    },
-    primaryButtonText: {
-        color: "#000",
-        fontWeight: "700",
-    },
-    assignmentCard: {
-        backgroundColor: "#14161C",
-        borderRadius: 18,
-        padding: 16,
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 25,
-        borderWidth: 1,
-        borderColor: "#2A2E38",
-    },
-    iconCircle: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: "#1F222B",
-        justifyContent: "center",
-        alignItems: "center",
-        marginRight: 12,
-    },
-    smallButton: {
-        backgroundColor: "#FFD43B",
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 12,
-    },
-    smallButtonText: {
-        color: "#000",
-        fontWeight: "600",
-        fontSize: 12,
-    },
-    taskCard: {
-        backgroundColor: "#1A1D24",
-        borderRadius: 18,
-        padding: 16,
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 15,
-    },
-    iconCircleDark: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: "#14161C",
-        justifyContent: "center",
-        alignItems: "center",
-        marginRight: 12,
-    },
-    completedCircle: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: "#2ECC71",
-        justifyContent: "center",
-        alignItems: "center",
-        marginRight: 12,
-    },
-    timeText: {
-        color: "#8B90A0",
-        fontSize: 11,
-        marginBottom: 6,
-        textAlign: "right",
-    },
-    statusBadge: {
-        borderWidth: 1,
-        borderColor: "#FFD43B",
-        borderRadius: 10,
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-    },
-    statusText: {
-        color: "#FFD43B",
-        fontSize: 10,
-    },
-    price: {
-        color: "#FFD43B",
-        fontWeight: "700",
-        fontSize: 16,
-    },
-    priorityBadge: {
-        backgroundColor: "#402225",
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 10,
-    },
-    priorityText: {
-        color: "#FF4D4F",
-        fontSize: 11,
-    },
-    fab: {
-        position: "absolute",
-        bottom: 40,
-        alignSelf: "center",
-        backgroundColor: "#FFD43B",
-        width: 70,
-        height: 70,
-        borderRadius: 35,
-        justifyContent: "center",
-        alignItems: "center",
-        elevation: 8,
-    },
+  container: {
+    flex: 1,
+    backgroundColor: "#0F1115",
+    paddingHorizontal: 18,
+  },
+
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 20,
+  },
+
+  headerTitle: {
+    fontSize: 24,
+    color: "#fff",
+    fontWeight: "bold",
+  },
+
+  plusButton: {
+    padding: 8,
+    borderRadius: 10,
+    backgroundColor: "#1A1D24",
+  },
+
+  monthRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+
+  monthText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
+  },
+
+  calendarGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 20,
+  },
+
+  dayBox: {
+    width: "14.28%",
+    aspectRatio: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+
+  selectedDay: {
+    backgroundColor: "#FFD43B",
+    borderRadius: 8,
+  },
+
+  dayText: {
+    color: "#fff",
+    fontSize: 14,
+  },
+
+  repairsTitle: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 15,
+  },
+
+  noRepairs: {
+    color: "#888",
+    fontSize: 14,
+  },
+
+  card: {
+    flexDirection: "row",
+    backgroundColor: "#1A1D24",
+    padding: 15,
+    borderRadius: 16,
+    marginBottom: 15,
+  },
+
+  time: {
+    color: "#FFD43B",
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+
+  car: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+
+  sub: {
+    color: "#8B90A0",
+    fontSize: 12,
+    marginTop: 4,
+  },
+
+  plate: {
+    color: "#FFD43B",
+    fontSize: 11,
+    marginTop: 4,
+  },
 });
-*/
