@@ -3,13 +3,12 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useEffect } from "react";
 import * as NavigationBar from "expo-navigation-bar";
 
+import LoginScreen from "./screens/LoginScreen";
 import HomeScreen from "./screens/HomeScreen";
 import OrdersScreen from "./screens/OrdersScreen";
 import AgendaScreen from "./screens/AgendaScreen";
 
-
 import PastRepairsScreen from "./screens/PastRepairsScreen";
-
 import OrderDetailsScreen from "./screens/OrderDetailsScreen";
 
 import { app } from "./firebaseConfig";
@@ -33,7 +32,12 @@ export default function App() {
 
     return (
         <NavigationContainer>
-            <Stack.Navigator initialRouteName="Home">
+            <Stack.Navigator initialRouteName="Login">
+                <Stack.Screen
+                    name="Login"
+                    component={LoginScreen}
+                    options={{ headerShown: false }}
+                />
                 <Stack.Screen
                     name="Home"
                     component={HomeScreen}
