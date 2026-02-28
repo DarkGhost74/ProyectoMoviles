@@ -58,9 +58,30 @@ export default function LoginScreen({ navigation }) {
             
             console.log("¡Usuario autenticado en Firebase! UID:", user.uid);
             
-            // TODO (Fase 3): Aquí enviaremos el user.uid a PostgreSQL para verificar su rol.
-            // Por ahora, si Firebase dice que sí, lo dejamos pasar al Home:
-            navigation.replace("Home"); // Usamos replace para que no puedan volver atrás al login
+            // Enviamos el UID a nuestro servidor Node.js
+            const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/verify`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ firebase_uid: user.uid }),
+            });
+
+            const data = await response.json();
+
+            // Si PostgreSQL no encuentra al usuario (Error 404) o hay otro error
+            if (!response.ok) {
+                // Cerramos la sesión en Firebase para que no se quede pegado
+                await auth.signOut();
+                Alert.alert("Acceso Denegado", data.error || "No estás registrado en el sistema del taller.");
+                return;
+            }
+
+            console.log("Datos desde PostgreSQL:", data.user);
+            
+            // Si todo sale bien, pasamos al Home
+            // El Home ahora podrá saber si es Mecánico o Recepcionista viendo data.user.rol
+            navigation.replace("Home", { userData: data.user });
 
         } catch (error) {
             console.error("Error de Firebase:", error.code);
