@@ -8,11 +8,16 @@ import {
     StatusBar,
     KeyboardAvoidingView,
     Platform,
-    ScrollView,
+    Alert, // 🔥 NUEVO: Para mostrar errores
+    ActivityIndicator, // 🔥 NUEVO: Para mostrar un icono de carga
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+
+// 🔥 NUEVO: Importaciones de Firebase
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { app } from "../firebaseConfig"; 
 
 const CarShopIcon = () => (
     <View style={styles.logoContainer}>
@@ -34,6 +39,43 @@ export default function LoginScreen({ navigation }) {
     const [rememberMe, setRememberMe] = useState(false);
     const [emailFocused, setEmailFocused] = useState(false);
     const [passwordFocused, setPasswordFocused] = useState(false);
+    
+    // 🔥 NUEVO: Estado para bloquear el botón mientras carga
+    const [isLoading, setIsLoading] = useState(false);
+
+    // 🔥 NUEVO: Función principal de autenticación
+    const handleLogin = async () => {
+        if (!email || !password) {
+            Alert.alert("Error", "Por favor ingresa tu correo y contraseña.");
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const auth = getAuth(app);
+            const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
+            const user = userCredential.user;
+            
+            console.log("¡Usuario autenticado en Firebase! UID:", user.uid);
+            
+            // TODO (Fase 3): Aquí enviaremos el user.uid a PostgreSQL para verificar su rol.
+            // Por ahora, si Firebase dice que sí, lo dejamos pasar al Home:
+            navigation.replace("Home"); // Usamos replace para que no puedan volver atrás al login
+
+        } catch (error) {
+            console.error("Error de Firebase:", error.code);
+            // Manejo de errores en español para el usuario
+            if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                Alert.alert("Acceso Denegado", "El correo o la contraseña son incorrectos.");
+            } else if (error.code === 'auth/invalid-email') {
+                Alert.alert("Error", "El formato del correo no es válido.");
+            } else {
+                Alert.alert("Error", "Ocurrió un problema al iniciar sesión. Intenta de nuevo.");
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -80,6 +122,7 @@ export default function LoginScreen({ navigation }) {
                                     autoCorrect={false}
                                     onFocus={() => setEmailFocused(true)}
                                     onBlur={() => setEmailFocused(false)}
+                                    editable={!isLoading} // 🔥 NUEVO: Bloquear si está cargando
                                 />
                             </View>
                         </View>
@@ -103,6 +146,7 @@ export default function LoginScreen({ navigation }) {
                                     secureTextEntry={!showPassword}
                                     onFocus={() => setPasswordFocused(true)}
                                     onBlur={() => setPasswordFocused(false)}
+                                    editable={!isLoading} // 🔥 NUEVO: Bloquear si está cargando
                                 />
                                 <TouchableOpacity
                                     onPress={() =>
@@ -110,6 +154,7 @@ export default function LoginScreen({ navigation }) {
                                     }
                                     style={styles.eyeButton}
                                     activeOpacity={0.7}
+                                    disabled={isLoading}
                                 >
                                     <Text style={styles.eyeIcon}>
                                         {showPassword ? (
@@ -136,6 +181,7 @@ export default function LoginScreen({ navigation }) {
                                 style={styles.rememberRow}
                                 onPress={() => setRememberMe(!rememberMe)}
                                 activeOpacity={0.8}
+                                disabled={isLoading}
                             >
                                 <View
                                     style={[
@@ -154,14 +200,20 @@ export default function LoginScreen({ navigation }) {
                         </View>
 
                         {/* Sign In Button */}
+                        {/* 🔥 NUEVO: Conectado a la función handleLogin y muestra un loader */}
                         <TouchableOpacity
-                            style={styles.signInButton}
-                            onPress={() => navigation.navigate("Home")}
+                            style={[styles.signInButton, isLoading && { opacity: 0.7 }]}
+                            onPress={handleLogin}
                             activeOpacity={0.85}
+                            disabled={isLoading}
                         >
-                            <Text style={styles.signInText}>
-                                Iniciar Sesión
-                            </Text>
+                            {isLoading ? (
+                                <ActivityIndicator color="#1a1a1a" />
+                            ) : (
+                                <Text style={styles.signInText}>
+                                    Iniciar Sesión
+                                </Text>
+                            )}
                         </TouchableOpacity>
                         <Text style={styles.alertText}>
                             Si olvidaste la contraseña, contacta con tu jefe
