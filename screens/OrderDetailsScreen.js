@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     Image,
     Pressable,
+    FlatList,
 } from "react-native";
 import {
     SafeAreaProvider,
@@ -18,6 +19,54 @@ import { StatusBar } from "expo-status-bar";
 import BottomNav from "../components/BottomNav";
 import { useNavigation } from "@react-navigation/native"; //NAVEGACION
 
+const DATA = [
+    {
+        id: '1',
+        title: 'Alineación y balanceo',
+        status: 'Finalizado'
+    },
+    {
+        id: '2',
+        title: 'Cambio filtro aire acondicionado',
+        status: 'Pendiente'
+    },
+    {
+        id: '3',
+        title: 'Lavado de motor',
+        status: 'En Proceso'
+    },
+]
+
+
+const Item = ({ title, status }) => {
+  const renderIcon = () => {
+    switch (status) {
+      case "Finalizado":
+        return <Feather name="check-circle" size={18} color="#22C55E" />;
+      case "En Proceso":
+        return <Feather name="clock" size={18} color="#FFD43B" />;
+      case "Pendiente":
+        return <Feather name="x-circle" size={18} color="#EF4444" />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <View style={{
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginTop: 15,
+    }}>
+      <Text style={{ color: "#fff", fontWeight: "bold" }}>
+        {title}
+      </Text>
+
+      {renderIcon()}
+    </View>
+  );
+};
 
 
 export default function OrderDetailsScreen() {
@@ -57,7 +106,7 @@ export default function OrderDetailsScreen() {
 
                     }}                  //PONER EL NUMERO DE ORDEM               
                     >
-                        Orden #
+                        Orden #341
 
                     </Text>                    
                 </View>
@@ -67,7 +116,8 @@ export default function OrderDetailsScreen() {
                         style={[
                             styles.card,
                             { borderColor: "#FFD43B" },
-                            { borderWidth: 1}
+                            { borderWidth: 1},
+                            { marginTop: 15}
                         ]}
                     >
                         <View style={styles.rowBetween}>
@@ -77,8 +127,9 @@ export default function OrderDetailsScreen() {
                                     flexDirection: "row"}}>                                    
                                     <Text style={styles.subText}>SJD739A</Text>
                                     <Text style={styles.subText}>   Gris</Text>
+                                    <Text style={styles.subText}> 122,000Km</Text>
                                 </View>
-                                
+                                                                
                             </View>
                             <View style={{
                                 alignItems: "flex-end"
@@ -95,12 +146,32 @@ export default function OrderDetailsScreen() {
                                 }}>
                                     28/02/26</Text>
                             </View>
-
                         </View>
-
                     </View>
-                    
+                    <View 
+                        style={[
+                            styles.card,
+                            {borderColor: "#ffffffa8"},
+                            {borderWidth: 1}
+                        ]}
+                    >
+                        <Text style={styles.carTitle}>Servicios</Text>   
+                            <FlatList
+                                data={DATA}
+                                keyExtractor={(item) => item.id}
+                                renderItem={({ item }) => (
+                                    <Item title={item.title} status={item.status} />
+                            )}
+                        />        
+                    </View>
 
+                    <TouchableOpacity style={[styles.primaryButton]}>
+                            <Text style={styles.primaryButtonText}>
+                                Finalizar
+                            </Text>
+                    </TouchableOpacity>
+
+                    
                 </ScrollView>
 
 
