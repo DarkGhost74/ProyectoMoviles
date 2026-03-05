@@ -7,7 +7,6 @@ import {
     TouchableOpacity,
     Image,
     Pressable,
-    FlatList,
 } from "react-native";
 import {
     SafeAreaProvider,
@@ -50,48 +49,164 @@ const Service = ({ title, status }) => {
     );
 };
 
-const DATA = [
-    {
-        id: '1',
-        title: 'Cambio alerón delantero',
-        status: 'Finalizado'
-    },
+const OrderCard = ({ type, vehicleYear, vehicleBrand, vehicleModel, vehicleColor, vehiclePlate, services, notes, time }) => {
+    const getIconConfig = () => {
+        switch (type) {
+            case 'active':
+                return { iconFamily: 'Feather', icon: 'tool', bgColor: '#FFD43B', stripColor: '#FFD43B' };
+            case 'upcoming':
+                return { iconFamily: 'Ionicons', icon: 'time-outline', bgColor: '#FFD43B', stripColor: null };
+            case 'completed':
+                return { iconFamily: 'Ionicons', icon: 'checkmark', bgColor: '#1E7D32', stripColor: null };
+            default:
+                return { iconFamily: 'Feather', icon: 'tool', bgColor: '#FFD43B', stripColor: '#FFD43B' };
+        }
+    };
+
+    const iconConfig = getIconConfig();
+
+    const renderIcon = () => {
+        const iconProps = { size: 20, color: "#000" };
+        if (iconConfig.iconFamily === 'Ionicons') {
+            return <Ionicons name={iconConfig.icon} {...iconProps} />;
+        }
+        return <Feather name={iconConfig.icon} {...iconProps} />;
+    };
+
+    const vehicleText = `${vehicleYear} ${vehicleBrand} ${vehicleModel} • ${vehicleColor} • ${vehiclePlate}`;
+
+    return (
+        <View style={styles.orderCard}>
+            {type === 'active' && <View style={[styles.yellowStrip, { backgroundColor: iconConfig.stripColor }]} />}
+
+            <View style={[styles.iconContainer, { backgroundColor: iconConfig.bgColor }]}>
+                {renderIcon()}
+            </View>
+
+            <View style={{ flex: 1 }}>
+                {type === 'active' && (
+                    <View style={styles.rowBetween}>
+                        <Text style={styles.inProgress}>EN PROGRESO</Text>
+                        <Text style={styles.since}>Desde las {time}</Text>
+                    </View>
+                )}
+
+                {type === 'upcoming' && (
+                    <View style={styles.rowBetween}>
+                        <Text style={styles.scheduled}>PROGRAMADO</Text>
+                        <Text style={styles.since}>{time}</Text>
+                    </View>
+                )}
+
+                {type === 'completed' && (
+                    <View style={styles.rowBetween}>
+                        <Text style={styles.completed}>COMPLETADO</Text>
+                        <Text style={styles.since}>{time}</Text>
+                    </View>
+                )}
+
+                <Text style={styles.jobTitle}>{vehicleText}</Text>
+
+                {services.map((item) => (
+                    <Service
+                        key={item.id}
+                        title={item.title}
+                        status={item.status}
+                    />
+                ))}
+
+                {(type === 'active' || type === 'upcoming') && notes && (
+                    <View style={styles.notesSection}>
+                        <View style={styles.notesHeader}>
+                            <Ionicons name="document-text-outline" size={14} color="#FFD43B" />
+                            <Text style={styles.notesLabel}>Notas del cliente</Text>
+                        </View>
+                        <Text style={styles.notesText}>{notes}</Text>
+                    </View>
+                )}
+            </View>
+        </View>
+    );
+};
+
+const ACTIVE_ORDER = {
+    id: '1',
+    vehicleYear: '2026',
+    vehicleBrand: 'Ferrari',
+    vehicleModel: 'SF-26',
+    vehicleColor: 'Rojo',
+    vehiclePlate: '62SBG2',
+    status: 'EN PROGRESO',
+    since: '09:00 AM',
+    notes: 'El cliente reporta ruido extraño al abrir el DRS. También pidió que se revisara el sistema de escape por posibles fugas.',
+    services: [
+        { id: '1', title: 'Cambio alerón delantero', status: 'Finalizado' },
+        { id: '2', title: 'Inspección de unidad de potencia', status: 'Pendiente' },
+        { id: '3', title: 'Reparación turbo', status: 'En Proceso' },
+        { id: '4', title: 'Cambio de discos carbono-ceramicos', status: 'En Proceso' },
+        { id: '5', title: 'Chequeo de fondo plano', status: 'En Proceso' },
+        { id: '6', title: 'Cambio de llantas a compuesto blando', status: 'Pendiente' },
+    ]
+}
+
+const UPCOMING_ORDERS = [
     {
         id: '2',
-        title: 'Inspección de unidad de potencia',
-        status: 'Pendiente'
+        vehicleYear: '2019',
+        vehicleBrand: 'Ford',
+        vehicleModel: 'F-150',
+        vehicleColor: 'Verde',
+        vehiclePlate: '57SBG3',
+        time: 'Hoy, 02:30 PM',
+        notes: 'El cliente pidió que se revisara la presión de las llantas.',
+        services: [
+            { id: '1', title: 'Diagnóstico de Motor', status: 'Pendiente' },
+        ]
     },
     {
         id: '3',
-        title: 'Reparación turbo',
-        status: 'En Proceso'
-    },
+        vehicleYear: '2022',
+        vehicleBrand: 'Toyota',
+        vehicleModel: 'RAV4',
+        vehicleColor: 'Azul',
+        vehiclePlate: '29HJK1',
+        time: 'Mañana, 09:00 AM',
+        notes: '',
+        services: [
+            { id: '1', title: 'Reemplazo de Batería', status: 'Pendiente' },
+        ]
+    }
+]
+
+const COMPLETED_ORDERS = [
     {
         id: '4',
-        title: 'Cambio de discos carbono-ceramicos',
-        status: 'En Proceso'
+        vehicleYear: '2023',
+        vehicleBrand: 'BMW',
+        vehicleModel: 'X5',
+        vehicleColor: 'Negro',
+        vehiclePlate: '45JLM2',
+        time: '08:15 AM',
+        services: [
+            { id: '1', title: 'Cambio de Aceite y Filtro', status: 'Finalizado' },
+        ]
     },
     {
         id: '5',
-        title: 'Chequeo de fondo plano',
-        status: 'En Proceso'
-    },
-    {
-        id: '6',
-        title: 'Cambio de llantas a compuesto blando',
-        status: 'Pendiente'
-    },
+        vehicleYear: '2021',
+        vehicleBrand: 'Audi',
+        vehicleModel: 'A4',
+        vehicleColor: 'Blanco',
+        vehiclePlate: '78NPQ5',
+        time: 'Ayer',
+        services: [
+            { id: '1', title: 'Recarga de Aire Acondicionado', status: 'Finalizado' },
+        ]
+    }
 ]
 
 const ScreenContent = ({ navigation }) => {
     const insets = useSafeAreaInsets();
-
-    const servicios = [
-        { id: "1", servicio: "Cambio alerón delantero" },
-        { id: "2", servicio: "Inspección de unidad de potencia" },
-        { id: "3", servicio: "Cambio de discos ceramicos" },
-        { id: "4", servicio: "Chequeo de fondo plano" },
-    ];
 
     return (
         <>
@@ -119,57 +234,42 @@ const ScreenContent = ({ navigation }) => {
                     {/* ACTIVE REPAIR */}
                     <Text style={styles.sectionTitle}>Ordenes activas</Text>
 
-                    <View style={styles.activeCard}>
-                        <View style={styles.yellowStrip} />
-
-                        <View style={styles.activeIcon}>
-                            <Feather name="tool" size={20} color="#000" />
-                        </View>
-
-                        <View style={{ flex: 1 }}>
-                            <View style={styles.rowBetween}>
-                                <Text style={styles.inProgress}>
-                                    EN PROGRESO
-                                </Text>
-                                <Text style={styles.since}>
-                                    Desde las 09:00 AM
-                                </Text>
-                            </View>
-
-                            <Text style={styles.jobTitle}>
-                                2026 Ferrari SF-26 • Rojo • 62SBG2
-                            </Text>
-                            <FlatList
-                                data={DATA}
-                                keyExtractor={(item) => item.id}
-                                renderItem={({ item }) => (
-                                    <Service
-                                        title={item.title}
-                                        status={item.status}
-                                    />
-                                )}
-                            />
-                        </View>
-                    </View>
+                    <OrderCard
+                        type="active"
+                        vehicleYear={ACTIVE_ORDER.vehicleYear}
+                        vehicleBrand={ACTIVE_ORDER.vehicleBrand}
+                        vehicleModel={ACTIVE_ORDER.vehicleModel}
+                        vehicleColor={ACTIVE_ORDER.vehicleColor}
+                        vehiclePlate={ACTIVE_ORDER.vehiclePlate}
+                        services={ACTIVE_ORDER.services}
+                        notes={ACTIVE_ORDER.notes}
+                        time={ACTIVE_ORDER.since}
+                    />
 
                     {/* UPCOMING TASKS */}
                     <View style={styles.sectionRow}>
                         <Text style={styles.sectionTitle}>
                             Próximas ordenes
                         </Text>
-                        <Text style={styles.link}>Ver Calendario</Text>
+                        <TouchableOpacity onPress={() => navigation.navigate('Agenda')}>
+                            <Text style={styles.link}>Ver Calendario</Text>
+                        </TouchableOpacity>
                     </View>
 
-                    {renderUpcoming(
-                        "Diagnóstico de Motor",
-                        "2019 Ford F-150 • 57SBG3",
-                        "Hoy, 02:30 PM",
-                    )}
-                    {renderUpcoming(
-                        "Reemplazo de Batería",
-                        "2022 Toyota RAV4 • 29HJK1",
-                        "Mañana, 09:00 AM",
-                    )}
+                    {UPCOMING_ORDERS.map((order) => (
+                        <OrderCard
+                            key={order.id}
+                            type="upcoming"
+                            vehicleYear={order.vehicleYear}
+                            vehicleBrand={order.vehicleBrand}
+                            vehicleModel={order.vehicleModel}
+                            vehicleColor={order.vehicleColor}
+                            vehiclePlate={order.vehiclePlate}
+                            services={order.services}
+                            notes={order.notes}
+                            time={order.time}
+                        />
+                    ))}
 
                     {/* COMPLETED TASKS */}
                     <View style={styles.sectionRow}>
@@ -179,16 +279,19 @@ const ScreenContent = ({ navigation }) => {
                         <Text style={styles.subtle}>Ultimas 24h</Text>
                     </View>
 
-                    {renderCompleted(
-                        "Cambio de Aceite y Filtro",
-                        "BMW X5 • Finalizado 08:15 AM",
-                        "$124.00",
-                    )}
-                    {renderCompleted(
-                        "Recarga de Aire Acondicionado",
-                        "AUDI A4 • Finalizado Ayer",
-                        "$89.50",
-                    )}
+                    {COMPLETED_ORDERS.map((order) => (
+                        <OrderCard
+                            key={order.id}
+                            type="completed"
+                            vehicleYear={order.vehicleYear}
+                            vehicleBrand={order.vehicleBrand}
+                            vehicleModel={order.vehicleModel}
+                            vehicleColor={order.vehicleColor}
+                            vehiclePlate={order.vehiclePlate}
+                            services={order.services}
+                            time={order.time}
+                        />
+                    ))}
 
                     <View style={{ height: 120 }} />
                 </ScrollView>
@@ -199,32 +302,6 @@ const ScreenContent = ({ navigation }) => {
         </>
     );
 };
-
-const renderUpcoming = (title, sub, time) => (
-    <View style={styles.taskCard}>
-        <View style={styles.clockIcon}>
-            <Ionicons name="time-outline" size={18} color="#000" />
-        </View>
-        <View style={{ flex: 1 }}>
-            <Text style={styles.taskTitle}>{title}</Text>
-            <Text style={styles.taskSub}>{sub}</Text>
-        </View>
-        <Text style={styles.time}>{time}</Text>
-    </View>
-);
-
-const renderCompleted = (title, sub, price) => (
-    <View style={styles.taskCard}>
-        <View style={styles.checkIcon}>
-            <Ionicons name="checkmark" size={18} color="#fff" />
-        </View>
-        <View style={{ flex: 1 }}>
-            <Text style={styles.taskTitle}>{title}</Text>
-            <Text style={styles.taskSub}>{sub}</Text>
-        </View>
-        <Text style={styles.price}>{price}</Text>
-    </View>
-);
 
 export default HomeScreen;
 
@@ -311,7 +388,6 @@ const styles = StyleSheet.create({
         marginTop: 6,
         gap: 8,
         width: "100%",
-        backgroundColor: "#0f3581",
     },
 
     servicesText: {
@@ -321,7 +397,7 @@ const styles = StyleSheet.create({
         flexWrap: "wrap",
     },
 
-    activeCard: {
+    orderCard: {
         flexDirection: "row",
         backgroundColor: "#1A1D23",
         borderRadius: 20,
@@ -336,11 +412,10 @@ const styles = StyleSheet.create({
         marginRight: 12,
     },
 
-    activeIcon: {
+    iconContainer: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: "#FFD43B",
         justifyContent: "center",
         alignItems: "center",
         marginRight: 12,
@@ -348,6 +423,18 @@ const styles = StyleSheet.create({
 
     inProgress: {
         color: "#FFD43B",
+        fontSize: 12,
+        fontWeight: "bold",
+    },
+
+    scheduled: {
+        color: "#3B82F6",
+        fontSize: 12,
+        fontWeight: "bold",
+    },
+
+    completed: {
+        color: "#22C55E",
         fontSize: 12,
         fontWeight: "bold",
     },
@@ -444,26 +531,6 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
 
-    clockIcon: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: "#FFD43B",
-        justifyContent: "center",
-        alignItems: "center",
-        marginRight: 12,
-    },
-
-    checkIcon: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: "#1E7D32",
-        justifyContent: "center",
-        alignItems: "center",
-        marginRight: 12,
-    },
-
     taskTitle: {
         color: "#fff",
         fontWeight: "600",
@@ -479,13 +546,34 @@ const styles = StyleSheet.create({
         fontSize: 12,
     },
 
-    price: {
-        color: "#fff",
-        fontWeight: "600",
-    },
-
     rowBetween: {
         flexDirection: "row",
         justifyContent: "space-between",
+    },
+
+    notesSection: {
+        marginTop: 16,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: "#2A2D35",
+    },
+
+    notesHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 6,
+        gap: 6,
+    },
+
+    notesLabel: {
+        color: "#FFD43B",
+        fontSize: 12,
+        fontWeight: "600",
+    },
+
+    notesText: {
+        color: "#888",
+        fontSize: 13,
+        lineHeight: 18,
     },
 });
