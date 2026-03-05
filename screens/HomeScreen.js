@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     Image,
     Pressable,
+    FlatList,
 } from "react-native";
 import {
     SafeAreaProvider,
@@ -25,8 +26,72 @@ const HomeScreen = ({ navigation }) => {
     );
 };
 
+const Service = ({ title, status }) => {
+    const renderIcon = () => {
+        switch (status) {
+            case "Finalizado":
+                return (
+                    <Feather name="check-circle" size={18} color="#22C55E" />
+                );
+            case "En Proceso":
+                return <Feather name="clock" size={18} color="#FFD43B" />;
+            case "Pendiente":
+                return <Feather name="x-circle" size={18} color="#EF4444" />;
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <View style={styles.servicesRow}>
+            <Text style={styles.servicesText}>•  {title}</Text>
+            {renderIcon()}
+        </View>
+    );
+};
+
+const DATA = [
+    {
+        id: '1',
+        title: 'Cambio alerón delantero',
+        status: 'Finalizado'
+    },
+    {
+        id: '2',
+        title: 'Inspección de unidad de potencia',
+        status: 'Pendiente'
+    },
+    {
+        id: '3',
+        title: 'Reparación turbo',
+        status: 'En Proceso'
+    },
+    {
+        id: '4',
+        title: 'Cambio de discos carbono-ceramicos',
+        status: 'En Proceso'
+    },
+    {
+        id: '5',
+        title: 'Chequeo de fondo plano',
+        status: 'En Proceso'
+    },
+    {
+        id: '6',
+        title: 'Cambio de llantas a compuesto blando',
+        status: 'Pendiente'
+    },
+]
+
 const ScreenContent = ({ navigation }) => {
     const insets = useSafeAreaInsets();
+
+    const servicios = [
+        { id: "1", servicio: "Cambio alerón delantero" },
+        { id: "2", servicio: "Inspección de unidad de potencia" },
+        { id: "3", servicio: "Cambio de discos ceramicos" },
+        { id: "4", servicio: "Chequeo de fondo plano" },
+    ];
 
     return (
         <>
@@ -52,7 +117,7 @@ const ScreenContent = ({ navigation }) => {
                     </View>
 
                     {/* ACTIVE REPAIR */}
-                    <Text style={styles.sectionTitle}>Trabajo activo</Text>
+                    <Text style={styles.sectionTitle}>Ordenes activas</Text>
 
                     <View style={styles.activeCard}>
                         <View style={styles.yellowStrip} />
@@ -72,17 +137,26 @@ const ScreenContent = ({ navigation }) => {
                             </View>
 
                             <Text style={styles.jobTitle}>
-                                Inspección de Frenos y Cambio de Balatas
+                                2026 Ferrari SF-26 • Rojo • 62SBG2
                             </Text>
-                            <Text style={styles.jobSub}>
-                                2021 Honda Civic • Silver
-                            </Text>
+                            <FlatList
+                                data={DATA}
+                                keyExtractor={(item) => item.id}
+                                renderItem={({ item }) => (
+                                    <Service
+                                        title={item.title}
+                                        status={item.status}
+                                    />
+                                )}
+                            />
                         </View>
                     </View>
 
                     {/* UPCOMING TASKS */}
                     <View style={styles.sectionRow}>
-                        <Text style={styles.sectionTitle}>Próximas tareas</Text>
+                        <Text style={styles.sectionTitle}>
+                            Próximas ordenes
+                        </Text>
                         <Text style={styles.link}>Ver Calendario</Text>
                     </View>
 
@@ -100,7 +174,7 @@ const ScreenContent = ({ navigation }) => {
                     {/* COMPLETED TASKS */}
                     <View style={styles.sectionRow}>
                         <Text style={styles.sectionTitle}>
-                            Tareas Completadas
+                            Ordenes Completadas
                         </Text>
                         <Text style={styles.subtle}>Ultimas 24h</Text>
                     </View>
@@ -229,6 +303,22 @@ const styles = StyleSheet.create({
 
     subtle: {
         color: "#777",
+    },
+
+    servicesRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 6,
+        gap: 8,
+        width: "100%",
+        backgroundColor: "#0f3581",
+    },
+
+    servicesText: {
+        color: "#888",
+        fontSize: 13,
+        flex: 1,
+        flexWrap: "wrap",
     },
 
     activeCard: {
