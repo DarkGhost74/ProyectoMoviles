@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     View,
     Text,
@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     Image,
     Pressable,
+    Animated,
 } from "react-native";
 import {
     SafeAreaProvider,
@@ -49,7 +50,9 @@ const Service = ({ title, status }) => {
     );
 };
 
-const OrderCard = ({ type, vehicleYear, vehicleBrand, vehicleModel, vehicleColor, vehiclePlate, services, notes, time }) => {
+const OrderCard = ({ type, vehicleYear, vehicleBrand, vehicleModel, vehiclePlate, services, notes, time }) => {
+    const [expanded, setExpanded] = useState(false);
+
     const getIconConfig = () => {
         switch (type) {
             case 'active':
@@ -73,7 +76,25 @@ const OrderCard = ({ type, vehicleYear, vehicleBrand, vehicleModel, vehicleColor
         return <Feather name={iconConfig.icon} {...iconProps} />;
     };
 
-    const vehicleText = `${vehicleYear} ${vehicleBrand} ${vehicleModel} • ${vehicleColor} • ${vehiclePlate}`;
+    const vehicleText = `${vehicleYear} ${vehicleBrand} ${vehicleModel} • ${vehiclePlate}`;
+
+    const getStatusText = () => {
+        switch (type) {
+            case 'active': return 'EN PROGRESO';
+            case 'upcoming': return 'PROGRAMADO';
+            case 'completed': return 'COMPLETADO';
+            default: return '';
+        }
+    };
+
+    const getStatusStyle = () => {
+        switch (type) {
+            case 'active': return styles.inProgress;
+            case 'upcoming': return styles.scheduled;
+            case 'completed': return styles.completed;
+            default: return {};
+        }
+    };
 
     return (
         <View style={styles.orderCard}>
@@ -83,48 +104,46 @@ const OrderCard = ({ type, vehicleYear, vehicleBrand, vehicleModel, vehicleColor
                 {renderIcon()}
             </View>
 
-            <View style={{ flex: 1 }}>
-                {type === 'active' && (
-                    <View style={styles.rowBetween}>
-                        <Text style={styles.inProgress}>EN PROGRESO</Text>
-                        <Text style={styles.since}>Desde las {time}</Text>
+            <TouchableOpacity style={{ flex: 1 }} onPress={() => setExpanded(!expanded)} activeOpacity={0.8}>
+                <View style={styles.rowBetween}>
+                    <Text style={getStatusStyle()}>{getStatusText()}</Text>
+                    <View style={styles.timeRow}>
+                        <Text style={styles.since}>
+                            {type === 'active' ? `Desde las ${time}` : time}
+                        </Text>
+                        <Ionicons 
+                            name={expanded ? "chevron-up" : "chevron-down"} 
+                            size={16} 
+                            color="#777" 
+                            style={{ marginLeft: 8 }}
+                        />
                     </View>
-                )}
-
-                {type === 'upcoming' && (
-                    <View style={styles.rowBetween}>
-                        <Text style={styles.scheduled}>PROGRAMADO</Text>
-                        <Text style={styles.since}>{time}</Text>
-                    </View>
-                )}
-
-                {type === 'completed' && (
-                    <View style={styles.rowBetween}>
-                        <Text style={styles.completed}>COMPLETADO</Text>
-                        <Text style={styles.since}>{time}</Text>
-                    </View>
-                )}
+                </View>
 
                 <Text style={styles.jobTitle}>{vehicleText}</Text>
 
-                {services.map((item) => (
-                    <Service
-                        key={item.id}
-                        title={item.title}
-                        status={item.status}
-                    />
-                ))}
+                {expanded && (
+                    <View style={styles.expandedContent}>
+                        {services.map((item) => (
+                            <Service
+                                key={item.id}
+                                title={item.title}
+                                status={item.status}
+                            />
+                        ))}
 
-                {(type === 'active' || type === 'upcoming') && notes && (
-                    <View style={styles.notesSection}>
-                        <View style={styles.notesHeader}>
-                            <Ionicons name="document-text-outline" size={14} color="#FFD43B" />
-                            <Text style={styles.notesLabel}>Notas del cliente</Text>
-                        </View>
-                        <Text style={styles.notesText}>{notes}</Text>
+                        {(type === 'active' || type === 'upcoming') && notes && (
+                            <View style={styles.notesSection}>
+                                <View style={styles.notesHeader}>
+                                    <Ionicons name="document-text-outline" size={14} color="#FFD43B" />
+                                    <Text style={styles.notesLabel}>Notas del cliente</Text>
+                                </View>
+                                <Text style={styles.notesText}>{notes}</Text>
+                            </View>
+                        )}
                     </View>
                 )}
-            </View>
+            </TouchableOpacity>
         </View>
     );
 };
@@ -134,7 +153,6 @@ const ACTIVE_ORDER = {
     vehicleYear: '2026',
     vehicleBrand: 'Ferrari',
     vehicleModel: 'SF-26',
-    vehicleColor: 'Rojo',
     vehiclePlate: '62SBG2',
     status: 'EN PROGRESO',
     since: '09:00 AM',
@@ -155,7 +173,6 @@ const UPCOMING_ORDERS = [
         vehicleYear: '2019',
         vehicleBrand: 'Ford',
         vehicleModel: 'F-150',
-        vehicleColor: 'Verde',
         vehiclePlate: '57SBG3',
         time: 'Hoy, 02:30 PM',
         notes: 'El cliente pidió que se revisara la presión de las llantas.',
@@ -168,7 +185,6 @@ const UPCOMING_ORDERS = [
         vehicleYear: '2022',
         vehicleBrand: 'Toyota',
         vehicleModel: 'RAV4',
-        vehicleColor: 'Azul',
         vehiclePlate: '29HJK1',
         time: 'Mañana, 09:00 AM',
         notes: '',
@@ -184,7 +200,6 @@ const COMPLETED_ORDERS = [
         vehicleYear: '2023',
         vehicleBrand: 'BMW',
         vehicleModel: 'X5',
-        vehicleColor: 'Negro',
         vehiclePlate: '45JLM2',
         time: '08:15 AM',
         services: [
@@ -196,7 +211,6 @@ const COMPLETED_ORDERS = [
         vehicleYear: '2021',
         vehicleBrand: 'Audi',
         vehicleModel: 'A4',
-        vehicleColor: 'Blanco',
         vehiclePlate: '78NPQ5',
         time: 'Ayer',
         services: [
@@ -239,7 +253,6 @@ const ScreenContent = ({ navigation }) => {
                         vehicleYear={ACTIVE_ORDER.vehicleYear}
                         vehicleBrand={ACTIVE_ORDER.vehicleBrand}
                         vehicleModel={ACTIVE_ORDER.vehicleModel}
-                        vehicleColor={ACTIVE_ORDER.vehicleColor}
                         vehiclePlate={ACTIVE_ORDER.vehiclePlate}
                         services={ACTIVE_ORDER.services}
                         notes={ACTIVE_ORDER.notes}
@@ -263,7 +276,6 @@ const ScreenContent = ({ navigation }) => {
                             vehicleYear={order.vehicleYear}
                             vehicleBrand={order.vehicleBrand}
                             vehicleModel={order.vehicleModel}
-                            vehicleColor={order.vehicleColor}
                             vehiclePlate={order.vehiclePlate}
                             services={order.services}
                             notes={order.notes}
@@ -286,7 +298,6 @@ const ScreenContent = ({ navigation }) => {
                             vehicleYear={order.vehicleYear}
                             vehicleBrand={order.vehicleBrand}
                             vehicleModel={order.vehicleModel}
-                            vehicleColor={order.vehicleColor}
                             vehiclePlate={order.vehiclePlate}
                             services={order.services}
                             time={order.time}
@@ -442,6 +453,15 @@ const styles = StyleSheet.create({
     since: {
         color: "#777",
         fontSize: 12,
+    },
+
+    timeRow: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+
+    expandedContent: {
+        marginTop: 12,
     },
 
     jobTitle: {
