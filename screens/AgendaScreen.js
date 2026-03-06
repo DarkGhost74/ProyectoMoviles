@@ -6,6 +6,7 @@ import {
   ScrollView,
   Pressable,
 } from "react-native";
+
 import { Feather } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
@@ -15,7 +16,39 @@ const months = [
   "Enero","Febrero","Marzo","Abril","Mayo","Junio",
   "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
 ];
+
 const weekDays = ["L","M","M","J","V","S","D"];
+
+const mockOrders = {
+  "2026-03-06": [
+    {
+      id: 1,
+      vehicle: "Ford F-150",
+      service: "Diagnóstico de motor",
+      plate: "PL-9988",
+      time: "02:30 PM",
+      status: "PENDIENTE"
+    }
+  ],
+  "2026-03-07": [
+    {
+      id: 2,
+      vehicle: "Toyota RAV4",
+      service: "Servicio de mantenimiento",
+      plate: "TX-5544",
+      time: "09:00 AM",
+      status: "PROGRAMADO"
+    },
+    {
+      id: 3,
+      vehicle: "BMW X5",
+      service: "Cambio de aceite",
+      plate: "BM-2233",
+      time: "11:00 AM",
+      status: "PROGRAMADO"
+    }
+  ]
+};
 
 export default function AgendaScreen() {
 
@@ -23,37 +56,42 @@ export default function AgendaScreen() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedDay, setSelectedDay] = useState(new Date().getDate());
   const [filterType, setFilterType] = useState("day");
-  const [showCalendar, setShowCalendar] = useState(true);
 
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
-const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
- const repairs = [
-  {
-    id: 1,
-    fecha: "2026-02-05",
-    hora: "09:00 AM",
-    servicio: "Cambio de aceite",
-    cliente: "Juan Perez",
-    placa: "ABC-1234"
-  },
-  {
-    id: 2,
-    fecha: "2026-02-05",
-    hora: "11:30 AM",
-    servicio: "Cambio de balatas",
-    cliente: "Carlos Lopez",
-    placa: "XYZ-9876"
-  },
-  {
-    id: 3,
-    fecha: "2026-02-10",
-    hora: "02:00 PM",
-    servicio: "Alineación",
-    cliente: "Luis Torres",
-    placa: "TRK-5512"
+  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+  const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+
+  const formattedDate = `${currentYear}-${String(currentMonth + 1).padStart(2,"0")}-${String(selectedDay).padStart(2,"0")}`;
+  const allDates = Object.keys(mockOrders);
+
+  let filteredOrders = [];
+
+  if (filterType === "day") {
+    filteredOrders = mockOrders[formattedDate] || [];
   }
-];
+
+  if (filterType === "month") {
+    const monthPrefix = `${currentYear}-${String(currentMonth + 1).padStart(2,"0")}`;
+    filteredOrders = allDates
+      .filter(date => date.startsWith(monthPrefix))
+      .flatMap(date => mockOrders[date]);
+  }
+
+  if (filterType === "week") {
+    const selectedDate = new Date(formattedDate);
+    const startOfWeek = new Date(selectedDate);
+    startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    filteredOrders = allDates
+      .filter(date => {
+        const d = new Date(date);
+        return d >= startOfWeek && d <= endOfWeek;
+      })
+      .flatMap(date => mockOrders[date]);
+  }
 
   const goNextMonth = () => {
     if (currentMonth === 11) {
@@ -74,147 +112,124 @@ const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
     }
     setSelectedDay(1);
   };
-const formattedDate = `${currentYear}-${String(currentMonth + 1).padStart(2,"0")}-${String(selectedDay).padStart(2,"0")}`;
 
-let filteredRepairs = repairs;
-
-if (filterType === "day") {
-  filteredRepairs = repairs.filter(r => r.fecha === formattedDate);
-}
-
-if (filterType === "month") {
-  filteredRepairs = repairs.filter(r => 
-    r.fecha.startsWith(`${currentYear}-${String(currentMonth + 1).padStart(2,"0")}`)
-  );
-}
-
-if (filterType === "week") {
-  const selectedDate = new Date(formattedDate);
-  const startOfWeek = new Date(selectedDate);
-  startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
-  const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(startOfWeek.getDate() + 6);
-
-  filteredRepairs = repairs.filter(r => {
-    const repairDate = new Date(r.fecha);
-    return repairDate >= startOfWeek && repairDate <= endOfWeek;
-  });
-}
   return (
     <>
       <StatusBar style="light" />
       <SafeAreaView style={styles.container} edges={["top"]}>
 
-        <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
 
-          {/* HEADER */}
           <View style={styles.headerRow}>
-            
             <Text style={styles.headerTitle}>Órdenes programadas</Text>
-            
           </View>
 
-          {/* Navegacion del mes */}
           <View style={styles.monthRow}>
             <Pressable onPress={goPrevMonth}>
               <Feather name="chevron-left" size={22} color="#fff" />
             </Pressable>
 
-            <Pressable onPress={() => setShowCalendar(!showCalendar)}>
-              <Text style={styles.monthText}>
-                {months[currentMonth]} {currentYear}
-              </Text>
-            </Pressable>
+            <Text style={styles.monthText}>
+              {months[currentMonth]} {currentYear}
+            </Text>
 
             <Pressable onPress={goNextMonth}>
               <Feather name="chevron-right" size={22} color="#fff" />
             </Pressable>
           </View>
 
-          {/* CALENDAR GRID */}
-          {/* WEEK DAYS */}
-<View style={styles.weekRow}>
-  {weekDays.map((day, index) => (
-    <Text key={index} style={styles.weekDayText}>
-      {day}
-    </Text>
-  ))}
-</View>
-            <View style={styles.calendarGrid}>
-             {[
-  ...Array(startOffset).fill(null),
-  ...Array(daysInMonth).keys()
-].map((value, i) => {
+          <View style={styles.weekRow}>
+            {weekDays.map((day, index) => (
+              <Text key={index} style={styles.weekDayText}>{day}</Text>
+            ))}
+          </View>
 
-  if (value === null) {
-    return <View key={i} style={styles.dayBox} />;
-  }
+          <View style={styles.calendarGrid}>
+            {[...Array(startOffset).fill(null), ...Array(daysInMonth).keys()]
+              .map((value, i) => {
 
-  const day = value + 1;
-  const isSelected = selectedDay === day;
+                if (value === null) {
+                  return <View key={i} style={styles.dayBox} />;
+                }
 
-  return (
-    <Pressable
-      key={i}
-      style={[
-        styles.dayBox,
-        isSelected && styles.selectedDay
-      ]}
-      onPress={() => setSelectedDay(day)}
-    >
-      <Text style={[
-        styles.dayText,
-        isSelected && { color: "#000" }
-      ]}>
-        {day}
-      </Text>
-    </Pressable>
-  );
-})}
-            </View>
+                const day = value + 1;
+                const isSelected = selectedDay === day;
+
+                return (
+                  <Pressable
+                    key={i}
+                    style={[
+                      styles.dayBox,
+                      isSelected && styles.selectedDay
+                    ]}
+                    onPress={() => setSelectedDay(day)}
+                  >
+                    <Text style={[
+                      styles.dayText,
+                      isSelected && { color: "#000" }
+                    ]}>
+                      {day}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+          </View>
+
           <View style={styles.filterRow}>
-  {["day","week","month"].map(type => (
-    <Pressable
-      key={type}
-      onPress={() => setFilterType(type)}
-      style={[
-        styles.filterButton,
-        filterType === type && styles.activeFilter
-      ]}
-    >
-      <Text
-        style={[
-          styles.filterText,
-          filterType === type && { color: "#000" }
-        ]}
-      >
-        {type === "day" ? "Día" : type === "week" ? "Semana" : "Mes"}
-      </Text>
-    </Pressable>
-  ))}
-</View>
+            {["day","week","month"].map(type => (
+              <Pressable
+                key={type}
+                onPress={() => setFilterType(type)}
+                style={[
+                  styles.filterButton,
+                  filterType === type && styles.activeFilter
+                ]}
+              >
+                <Text style={[
+                  styles.filterText,
+                  filterType === type && { color: "#000" }
+                ]}>
+                  {type === "day" ? "Día" : type === "week" ? "Semana" : "Mes"}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
 
-         
-          <Text style={styles.repairsTitle}>
-            Ordenes para {months[currentMonth]} {selectedDay}
-          </Text>
+          <Text style={styles.repairsTitle}>Órdenes</Text>
 
-      
-          {filteredRepairs.length === 0 ? (
+          {filteredOrders.length === 0 ? (
             <Text style={styles.noRepairs}>
-              No hay ordenes programadas para este día.
+              No hay órdenes para este filtro.
             </Text>
           ) : (
-            filteredRepairs.map((item) => (
-  <View key={item.id} style={styles.card}>
-                <Text style={styles.time}>{item.time}</Text>
-                <View style={{ marginLeft: 10 }}>
-                  <Text style={styles.car}>{item.car}</Text>
-                  <Text style={styles.sub}>
-                    {item.service}
+            filteredOrders.map((order) => (
+              <View key={order.id} style={styles.orderCard}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.vehicle}>{order.vehicle}</Text>
+                  <Text style={styles.service}>
+                    {order.service} • {order.plate}
                   </Text>
-                  <Text style={styles.plate}>
-                    {item.plate}
+                  <Text style={styles.timeText}>{order.time}</Text>
+                </View>
+
+                <View
+                  style={[
+                    styles.statusBadge,
+                    order.status === "PENDIENTE"
+                      ? styles.pendingBadge
+                      : styles.programmedBadge
+                  ]}
+                >
+                  <Text style={[
+                    styles.statusText,
+                    order.status === "PENDIENTE"
+                      ? styles.pendingText
+                      : styles.programmedText
+                  ]}>
+                    {order.status}
                   </Text>
                 </View>
               </View>
@@ -237,11 +252,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
   },
 
+  scrollContent: {
+    paddingBottom: 40,
+  },
+
   headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginVertical: 20,
+    marginTop: 20,
+  marginBottom: 10,
   },
 
   headerTitle: {
@@ -250,17 +267,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  plusButton: {
-    padding: 8,
-    borderRadius: 10,
-    backgroundColor: "#1A1D24",
-  },
-
   monthRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 10,
   },
 
   monthText: {
@@ -269,18 +280,32 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
+  weekRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 5,
+  },
+
+  weekDayText: {
+    width: "14.28%",
+    textAlign: "center",
+    color: "#8B90A0",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+
   calendarGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginBottom: 20,
+    marginBottom: 2,
   },
 
   dayBox: {
     width: "14.28%",
-    aspectRatio: 1,
+    height: 38,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 4,
   },
 
   selectedDay: {
@@ -291,6 +316,29 @@ const styles = StyleSheet.create({
   dayText: {
     color: "#fff",
     fontSize: 14,
+  },
+
+  filterRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 0,
+    marginBottom: 8,
+  },
+
+  filterButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    backgroundColor: "#1A1D24",
+    borderRadius: 20,
+  },
+
+  activeFilter: {
+    backgroundColor: "#FFD43B",
+  },
+
+  filterText: {
+    color: "#fff",
+    fontSize: 13,
   },
 
   repairsTitle: {
@@ -305,69 +353,58 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
-  card: {
+  orderCard: {
     flexDirection: "row",
     backgroundColor: "#1A1D24",
-    padding: 15,
+    padding: 16,
     borderRadius: 16,
     marginBottom: 15,
+    alignItems: "center",
   },
 
-  time: {
-    color: "#FFD43B",
-    fontWeight: "bold",
-    fontSize: 14,
-  },
-
-  car: {
+  vehicle: {
     color: "#fff",
     fontSize: 15,
     fontWeight: "600",
   },
 
-  sub: {
+  service: {
     color: "#8B90A0",
     fontSize: 12,
     marginTop: 4,
   },
 
-  plate: {
-    color: "#FFD43B",
-    fontSize: 11,
+  timeText: {
+    color: "#8B90A0",
+    fontSize: 12,
     marginTop: 4,
   },
-  filterRow: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  marginBottom: 20,
-},
 
-filterButton: {
-  paddingVertical: 8,
-  paddingHorizontal: 20,
-  backgroundColor: "#1A1D24",
-  borderRadius: 20,
-},
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
 
-activeFilter: {
-  backgroundColor: "#FFD43B",
-},
+  pendingBadge: {
+    backgroundColor: "#FFD43B",
+  },
 
-filterText: {
-  color: "#fff",
-  fontSize: 13,
-},
-weekRow: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  marginBottom: 10,
-},
+  programmedBadge: {
+    borderWidth: 1,
+    borderColor: "#FFD43B",
+  },
 
-weekDayText: {
-  width: "14.28%",
-  textAlign: "center",
-  color: "#8B90A0",
-  fontSize: 12,
-  fontWeight: "600",
-},
+  statusText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+
+  pendingText: {
+    color: "#000",
+  },
+
+  programmedText: {
+    color: "#FFD43B",
+  },
 });
