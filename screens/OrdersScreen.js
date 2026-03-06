@@ -94,37 +94,37 @@ export default function OrdersScreen({ navigation }) {
                         "Ford F-150",
                         "Diagnostico de motor • PL-9988",
                         "HOY, 02:30 PM",
-                        "PENDIENTE",
+                        "PENDIENTE"
                     )}
                     {renderUpcoming(
                         "Toyota RAV4",
                         "Servicio de mantenimiento • TX-5544",
                         "MAÑANA, 09:00 AM",
-                        "PROGRAMADO",
+                        "PROGRAMADO"
                     )}
                     {renderUpcoming(
-                        "Toyota RAV4",
-                        "Servicio de mantenimiento • TX-5544",
-                        "MAÑANA, 09:00 AM",
-                        "PROGRAMADO",
+                        "BMW X5",
+                        "Cambio de aceite • BM-2233",
+                        "MAÑANA, 11:00 AM",
+                        "PROGRAMADO"
                     )}
                     {renderUpcoming(
-                        "Toyota RAV4",
-                        "Servicio de mantenimiento • TX-5544",
-                        "MAÑANA, 09:00 AM",
-                        "PROGRAMADO",
+                        "Nissan Sentra",
+                        "Revisión de frenos • NS-8877",
+                        "20/03/2026, 10:00 AM",
+                        "PROGRAMADO"
                     )}
                     {renderUpcoming(
-                        "Toyota RAV4",
-                        "Servicio de mantenimiento • TX-5544",
-                        "MAÑANA, 09:00 AM",
-                        "PROGRAMADO",
+                        "Chevrolet Malibu",
+                        "Diagnóstico eléctrico • CH-4455",
+                        "21/03/2026, 02:00 PM",
+                        "PROGRAMADO"
                     )}
                     {renderUpcoming(
-                        "Toyota RAV4",
-                        "Servicio de mantenimiento • TX-5544",
-                        "MAÑANA, 09:00 AM",
-                        "PROGRAMADO",
+                        "Mazda CX-5",
+                        "Alineación y balanceo • MZ-1122",
+                        "22/03/2026, 09:30 AM",
+                        "PROGRAMADO"
                     )}
                 </ScrollView>
                 <BottomNav active="Orders" />
@@ -301,17 +301,5 @@ const styles = StyleSheet.create({
     priorityText: {
         color: "#FF4D4F",
         fontSize: 11,
-    },
-    fab: {
-        position: "absolute",
-        bottom: 40,
-        alignSelf: "center",
-        backgroundColor: "#FFD43B",
-        width: 70,
-        height: 70,
-        borderRadius: 35,
-        justifyContent: "center",
-        alignItems: "center",
-        elevation: 8,
     },
 });

@@ -36,7 +36,7 @@ export default function BottomNav({ active }) {
                 />
             </Pressable>
 
-       <Pressable onPress={() => navigation.navigate("PastRepairs")}>
+<Pressable onPress={() => navigation.navigate("PastRepairs")}>
     <Feather
         name="archive"
         size={24}
@@ -48,7 +48,7 @@ export default function BottomNav({ active }) {
 }
 
 const styles = StyleSheet.create({
-    bottomBar: {
+bottomBar: {
         position: "absolute",
         bottom: 0,
         left: 0,
@@ -56,7 +56,8 @@ const styles = StyleSheet.create({
         backgroundColor: "#15181E",
         height: 70,
         flexDirection: "row",
-        justifyContent: "space-around",
+        justifyContent: "space-evenly",
         alignItems: "center",
+        paddingHorizontal: 10,
     },
 });

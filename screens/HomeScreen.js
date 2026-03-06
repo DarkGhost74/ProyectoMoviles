@@ -19,9 +19,11 @@ import { StatusBar } from "expo-status-bar";
 import BottomNav from "../components/BottomNav";
 
 const HomeScreen = ({ navigation }) => {
+    const [expandedId, setExpandedId] = useState(null);
+    
     return (
         <SafeAreaProvider>
-            <ScreenContent navigation={navigation} />
+            <ScreenContent navigation={navigation} expandedId={expandedId} setExpandedId={setExpandedId} />
         </SafeAreaProvider>
     );
 };
@@ -50,8 +52,21 @@ const Service = ({ title, status }) => {
     );
 };
 
-const OrderCard = ({ type, vehicleYear, vehicleBrand, vehicleModel, vehiclePlate, services, notes, time }) => {
-    const [expanded, setExpanded] = useState(false);
+const OrderCard = ({ type, vehicleYear, vehicleBrand, vehicleModel, vehiclePlate, services, notes, time, navigation, expandedId, setExpandedId }) => {
+    const isExpanded = expandedId === `${type}-${vehiclePlate}`;
+    
+    const getMileage = () => {
+        if (vehicleBrand === 'Ferrari') return '32,500 km';
+        if (vehicleBrand === 'Ford') return '78,900 km';
+        if (vehicleBrand === 'Toyota' && vehicleModel === 'RAV4') return '42,000 km';
+        if (vehicleBrand === 'BMW') return '28,300 km';
+        if (vehicleBrand === 'Audi') return '55,200 km';
+        return '50,000 km';
+    };
+
+    const handlePress = () => {
+        setExpandedId(isExpanded ? null : `${type}-${vehiclePlate}`);
+    };
 
     const getIconConfig = () => {
         switch (type) {
@@ -104,7 +119,7 @@ const OrderCard = ({ type, vehicleYear, vehicleBrand, vehicleModel, vehiclePlate
                 {renderIcon()}
             </View>
 
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => setExpanded(!expanded)} activeOpacity={0.8}>
+            <TouchableOpacity style={{ flex: 1 }} onPress={handlePress} activeOpacity={0.8}>
                 <View style={styles.rowBetween}>
                     <Text style={getStatusStyle()}>{getStatusText()}</Text>
                     <View style={styles.timeRow}>
@@ -112,7 +127,7 @@ const OrderCard = ({ type, vehicleYear, vehicleBrand, vehicleModel, vehiclePlate
                             {type === 'active' ? `Desde las ${time}` : time}
                         </Text>
                         <Ionicons 
-                            name={expanded ? "chevron-up" : "chevron-down"} 
+                            name={isExpanded ? "chevron-up" : "chevron-down"} 
                             size={16} 
                             color="#777" 
                             style={{ marginLeft: 8 }}
@@ -122,7 +137,7 @@ const OrderCard = ({ type, vehicleYear, vehicleBrand, vehicleModel, vehiclePlate
 
                 <Text style={styles.jobTitle}>{vehicleText}</Text>
 
-                {expanded && (
+                {isExpanded && (
                     <View style={styles.expandedContent}>
                         {services.map((item) => (
                             <Service
@@ -141,6 +156,33 @@ const OrderCard = ({ type, vehicleYear, vehicleBrand, vehicleModel, vehiclePlate
                                 <Text style={styles.notesText}>{notes}</Text>
                             </View>
                         )}
+
+                        <TouchableOpacity 
+                            style={styles.detailsButton} 
+                            onPress={() => {
+                                const serviceInfo = services.map(s => s.title).join(', ') || 'Servicio general';
+                                if (type === 'completed') {
+                                    navigation.navigate('LastService', { 
+                                        vehicle: `${vehicleYear} ${vehicleBrand} ${vehicleModel}`,
+                                        plate: vehiclePlate,
+                                        service: serviceInfo,
+                                        mileage: getMileage(),
+                                        notes: notes || ''
+                                    });
+                                } else {
+                                    navigation.navigate('NextService', { 
+                                        vehicle: `${vehicleYear} ${vehicleBrand} ${vehicleModel}`,
+                                        plate: vehiclePlate,
+                                        service: serviceInfo,
+                                        mileage: getMileage(),
+                                        notes: notes || ''
+                                    });
+                                }
+                            }}
+                        >
+                            <Text style={styles.detailsButtonText}>Detalles</Text>
+                            <Feather name="chevron-right" size={14} color="#FFD43B" />
+                        </TouchableOpacity>
                     </View>
                 )}
             </TouchableOpacity>
@@ -187,7 +229,7 @@ const UPCOMING_ORDERS = [
         vehicleModel: 'RAV4',
         vehiclePlate: '29HJK1',
         time: 'Mañana, 09:00 AM',
-        notes: '',
+        notes: 'El cliente solicita que se revise el sistema de aire acondicionado.',
         services: [
             { id: '1', title: 'Reemplazo de Batería', status: 'Pendiente' },
         ]
@@ -202,6 +244,7 @@ const COMPLETED_ORDERS = [
         vehicleModel: 'X5',
         vehiclePlate: '45JLM2',
         time: '08:15 AM',
+        notes: 'El cliente pidió que se revisara la alarma.',
         services: [
             { id: '1', title: 'Cambio de Aceite y Filtro', status: 'Finalizado' },
         ]
@@ -213,13 +256,14 @@ const COMPLETED_ORDERS = [
         vehicleModel: 'A4',
         vehiclePlate: '78NPQ5',
         time: 'Ayer',
+        notes: 'El cliente solicitó cambio de luces LED.',
         services: [
             { id: '1', title: 'Recarga de Aire Acondicionado', status: 'Finalizado' },
         ]
     }
 ]
 
-const ScreenContent = ({ navigation }) => {
+const ScreenContent = ({ navigation, expandedId, setExpandedId }) => {
     const insets = useSafeAreaInsets();
 
     return (
@@ -257,6 +301,9 @@ const ScreenContent = ({ navigation }) => {
                         services={ACTIVE_ORDER.services}
                         notes={ACTIVE_ORDER.notes}
                         time={ACTIVE_ORDER.since}
+                        navigation={navigation}
+                        expandedId={expandedId}
+                        setExpandedId={setExpandedId}
                     />
 
                     {/* UPCOMING TASKS */}
@@ -280,6 +327,9 @@ const ScreenContent = ({ navigation }) => {
                             services={order.services}
                             notes={order.notes}
                             time={order.time}
+                            navigation={navigation}
+                            expandedId={expandedId}
+                            setExpandedId={setExpandedId}
                         />
                     ))}
 
@@ -301,6 +351,9 @@ const ScreenContent = ({ navigation }) => {
                             vehiclePlate={order.vehiclePlate}
                             services={order.services}
                             time={order.time}
+                            navigation={navigation}
+                            expandedId={expandedId}
+                            setExpandedId={setExpandedId}
                         />
                     ))}
 
@@ -595,5 +648,24 @@ const styles = StyleSheet.create({
         color: "#888",
         fontSize: 13,
         lineHeight: 18,
+    },
+
+    detailsButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 12,
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: "#FFD43B",
+    },
+
+    detailsButtonText: {
+        color: "#FFD43B",
+        fontSize: 13,
+        fontWeight: "600",
+        marginRight: 4,
     },
 });

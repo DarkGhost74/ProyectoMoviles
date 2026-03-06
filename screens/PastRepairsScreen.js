@@ -1,26 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     View,
     Text,
     StyleSheet,
     ScrollView,
     TextInput,
+    TouchableOpacity,
 } from "react-native";
 import {
     Feather,
     MaterialCommunityIcons,
-    Octicons,
 } from "@expo/vector-icons";
 import {
-   
     SafeAreaView,
-    
 } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import BottomNav from "../components/BottomNav";
 
-export default function PastRepairsScreen() {
-   
+export default function PastRepairsScreen({ navigation }) {
+    const [expandedId, setExpandedId] = useState(null);
 
     return (
         <>
@@ -30,16 +28,13 @@ export default function PastRepairsScreen() {
                 edges={["top"]}
             >
                 <ScrollView
-    showsVerticalScrollIndicator={false}
-    contentContainerStyle={{ paddingBottom: 100 }}
->
-
-                    {/* TÍTULO */}
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: 100 }}
+                >
                     <Text style={styles.headerTitle}>
                         Historial de Reparaciones
                     </Text>
 
-                    {/* RESUMEN */}
                     <View style={styles.summaryCard}>
                         <View>
                             <Text style={styles.smallLabel}>
@@ -60,7 +55,6 @@ export default function PastRepairsScreen() {
                         </View>
                     </View>
 
-                    {/* BUSCADOR */}
                     <View style={styles.searchContainer}>
                         <Feather
                             name="search"
@@ -74,7 +68,6 @@ export default function PastRepairsScreen() {
                         />
                     </View>
 
-                    {/* SECCIÓN */}
                     <Text style={styles.sectionLabel}>
                         RECIENTEMENTE FINALIZADAS
                     </Text>
@@ -84,7 +77,11 @@ export default function PastRepairsScreen() {
                         "ABC-1234",
                         "Cambio de balatas",
                         "Sara Rodriguez",
-                        "Finalizada hace 2h"
+                        "Finalizada hace 2h",
+                        "El cliente pidió que se revisara el sistema de frenado.",
+                        navigation,
+                        expandedId,
+                        setExpandedId
                     )}
 
                     {renderCompleted(
@@ -92,30 +89,46 @@ export default function PastRepairsScreen() {
                         "GTI-0909",
                         "Cambio de aceite sintético",
                         "Pablo Lopez",
-                        "Finalizada hace 4h"
+                        "Finalizada hace 4h",
+                        "El cliente solicitó revisión de belts.",
+                        navigation,
+                        expandedId,
+                        setExpandedId
                     )}
 
                     {renderCompleted(
                         "Ford F-150 Raptor",
                         "RAP-7721",
                         "Calibración de transmisión",
-                        "Roberto Sanchez ",
-                        "Finalizada hace 6h"
+                        "Roberto Sanchez",
+                        "Finalizada hace 6h",
+                        "El cliente reportó ruido al acelerar.",
+                        navigation,
+                        expandedId,
+                        setExpandedId
                     )}
 
                 </ScrollView>
 
-               
-<BottomNav active="PastRepairs" />
+                <BottomNav active="PastRepairs" />
             </SafeAreaView>
         </>
     );
 }
 
-function renderCompleted(title, plate, service, mechanic, time) {
+function renderCompleted(title, plate, service, mechanic, time, notes, navigation, expandedId, setExpandedId) {
+    const isExpanded = expandedId === plate;
+    const servicesList = [
+        { id: '1', title: service, status: 'Finalizado' }
+    ];
+
+    const handlePress = () => {
+        setExpandedId(isExpanded ? null : plate);
+    };
+
     return (
         <View style={styles.taskCard}>
-            <View style={{ flex: 1 }}>
+            <TouchableOpacity onPress={handlePress} activeOpacity={0.8}>
                 <View style={styles.rowBetween}>
                     <View>
                         <Text style={styles.carTitle}>{title}</Text>
@@ -124,10 +137,18 @@ function renderCompleted(title, plate, service, mechanic, time) {
                         </Text>
                     </View>
 
-                    <View style={styles.completedBadge}>
-                        <Text style={styles.completedText}>
-                            COMPLETADA
-                        </Text>
+                    <View style={styles.rowBetween}>
+                        <View style={styles.completedBadge}>
+                            <Text style={styles.completedText}>
+                                COMPLETADA
+                            </Text>
+                        </View>
+                        <Feather 
+                            name={isExpanded ? "chevron-up" : "chevron-down"} 
+                            size={18} 
+                            color="#777" 
+                            style={{ marginLeft: 8 }}
+                        />
                     </View>
                 </View>
 
@@ -150,7 +171,46 @@ function renderCompleted(title, plate, service, mechanic, time) {
                         {time}
                     </Text>
                 </View>
-            </View>
+            </TouchableOpacity>
+
+            {isExpanded && (
+                <View style={styles.expandedContent}>
+                    <View style={styles.servicesList}>
+                        {servicesList.map((item) => (
+                            <View key={item.id} style={styles.serviceItem}>
+                                <Feather name="check-circle" size={14} color="#22C55E" />
+                                <Text style={styles.serviceText}>{item.title}</Text>
+                            </View>
+                        ))}
+                    </View>
+
+                    {notes && (
+                        <View style={styles.notesSection}>
+                            <View style={styles.notesHeader}>
+                                <MaterialCommunityIcons name="document-text-outline" size={14} color="#FFD43B" />
+                                <Text style={styles.notesLabel}>Notas del cliente</Text>
+                            </View>
+                            <Text style={styles.notesText}>{notes}</Text>
+                        </View>
+                    )}
+
+                    <TouchableOpacity 
+                        style={styles.detailsButton} 
+                        onPress={() => {
+                            navigation.navigate('LastService', { 
+                                vehicle: title,
+                                plate: plate,
+                                service: service,
+                                mileage: '65,000 km',
+                                notes: notes
+                            });
+                        }}
+                    >
+                        <Text style={styles.detailsButtonText}>Detalles</Text>
+                        <Feather name="chevron-right" size={14} color="#FFD43B" />
+                    </TouchableOpacity>
+                </View>
+            )}
         </View>
     );
 }
@@ -272,5 +332,72 @@ const styles = StyleSheet.create({
     timeText: {
         color: "#8B90A0",
         fontSize: 11,
+    },
+
+    expandedContent: {
+        marginTop: 12,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: "#2A2E38",
+    },
+
+    servicesList: {
+        marginBottom: 12,
+    },
+
+    serviceItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        marginTop: 6,
+    },
+
+    serviceText: {
+        color: "#888",
+        fontSize: 13,
+    },
+
+    detailsButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: "#FFD43B",
+    },
+
+    detailsButtonText: {
+        color: "#FFD43B",
+        fontSize: 13,
+        fontWeight: "600",
+        marginRight: 4,
+    },
+
+    notesSection: {
+        marginTop: 12,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: "#2A2E38",
+    },
+
+    notesHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 6,
+        gap: 6,
+    },
+
+    notesLabel: {
+        color: "#FFD43B",
+        fontSize: 12,
+        fontWeight: "600",
+    },
+
+    notesText: {
+        color: "#888",
+        fontSize: 13,
+        lineHeight: 18,
     },
 });
