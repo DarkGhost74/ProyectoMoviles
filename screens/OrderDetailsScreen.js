@@ -172,6 +172,7 @@ export default function OrderDetailsScreen() {
                     >
                         <Text style={styles.carTitle}>Servicios</Text>   
                             <FlatList
+                                scrollEnabled={false}
                                 data={DATA}
                                 keyExtractor={(item) => item.id}
                                 renderItem={({ item }) => (

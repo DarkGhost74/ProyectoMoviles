@@ -7,38 +7,230 @@ import {
     TouchableOpacity,
     Image,
     Pressable,
-    Button,
+    FlatList,
 } from "react-native";
-import {
-    Ionicons,
-    MaterialCommunityIcons,
-    Feather,
-    Octicons,
-} from "@expo/vector-icons";
 import {
     SafeAreaProvider,
     SafeAreaView,
     useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import BottomNav from "../components/BottomNav";
 import { useNavigation } from "@react-navigation/native"; //NAVEGACION
+import { descending } from "firebase/firestore/pipelines";
+import { Checkbox } from 'expo-checkbox';
+import { useState } from 'react';
 
+const servicesData = [                                           //CREAR LISTA SOLO FRONT, BACKEND CONSULTA -> JSON
+    {
+        id: "1",
+        name: "Alineación y balanceo",
+        description: "Ajuste de posición de las llants"
+    },
+    {
+        id: "2",
+        name: "Cambio de filtro de aire acondicionado",
+        description: "Reemplazo del filtro del aire acondicionado"
+    },
+    {
+        id: "3",
+        name: "Lavado de motor",
+        description: "Lavado exprés de motor"
+    },
+    {
+        id: "4",
+        name: "Cambio de aceite",
+        description: "Incluye filtro y hasta 5 litros de aceite sintetico"
+    },
+    {
+        id: "5",
+        name: "Inflado de llantas con nitrogeno",
+        description: "Inflado y calibración de llantas con nitrógeno"
+    },
+    {
+        id: "6",
+        name: "Rotación de llantas",
+        description: "Intercambio de posición de llantas para desgaste uniforme"
+    },
+    {
+        id: "7",
+        name: "Balanceo de llantas",
+        description: "Corrección de vibraciones en ruedas"
+    },
+    {
+        id: "8",
+        name: "Cambio de balatas",
+        description: "Reemplazo de balatas delanteras o traseras"
+    },
+    {
+        id: "9",
+        name: "Rectificación de discos",
+        description: "Ajuste de discos de freno para eliminar vibración"
+    },
+    {
+        id: "10",
+        name: "Revisión de frenos",
+        description: "Inspección del sistema de frenado"
+    },
+    {
+        id: "11",
+        name: "Diagnóstico con escáner",
+        description: "Lectura de códigos de falla del vehículo"
+    },
+    {
+        id: "12",
+        name: "Cambio de batería",
+        description: "Instalación de batería nueva"
+    },
+    {
+        id: "13",
+        name: "Revisión de batería",
+        description: "Prueba de carga y estado de batería"
+    },
+    {
+        id: "14",
+        name: "Cambio de bujías",
+        description: "Reemplazo de bujías del motor"
+    },
+    {
+        id: "15",
+        name: "Cambio de filtro de aire",
+        description: "Reemplazo del filtro de aire del motor"
+    },
+    {
+        id: "16",
+        name: "Cambio de filtro de gasolina",
+        description: "Reemplazo del filtro de combustible"
+    },
+    {
+        id: "17",
+        name: "Cambio de anticongelante",
+        description: "Sustitución del refrigerante del motor"
+    },
+    {
+        id: "18",
+        name: "Cambio de líquido de frenos",
+        description: "Reemplazo del líquido del sistema de frenos"
+    },
+    {
+        id: "19",
+        name: "Cambio de aceite de transmisión",
+        description: "Reemplazo del aceite de la transmisión"
+    },
+    {
+        id: "20",
+        name: "Afinación mayor",
+        description: "Servicio completo de afinación del motor"
+    },
+    {
+        id: "21",
+        name: "Afinación menor",
+        description: "Revisión básica y ajustes del motor"
+    },
 
+];
+
+const Service = ({ name, description }) => (
+    <View style={{
+        paddingVertical: 12,
+        paddingHorizontal: 15
+    }}>
+        <Text style={styles.serviceTitle}>{name}</Text>
+        <Text style={styles.subText}>{description}</Text>
+    </View>
+);
 
 export default function AddServiceScreen(){
     const navigation = useNavigation();
+    const insets = useSafeAreaInsets();
     return(
+
         <SafeAreaProvider>
-            <StatusBar style="light">
-                <SafeAreaView >
+            <SafeAreaView
+                style={[styles.container, { }]}
+                edges={["top", "bottom"]}
+            >
+                <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingHorizontal: 15,
+                    paddingVertical: 10,
+                }}>
+                    <Pressable 
+                        onPress={() => navigation.navigate("OrderDetails")}  //IR ATRAS
+                        hitSlop={12}
+                        style={{ padding: 1}}
+                        >
+                        <MaterialCommunityIcons
+                            name="arrow-left"
+                            size={24}
+                            color={"#ffff"}                       
+                        />           
+                    </Pressable>
+                    <Text
+                    style={{
+                        color: "#ffff",
+                        fontSize: 18,
+                        fontWeight: "",
+                        marginLeft: 0,
+                        flex: 1,
+                        textAlign: "center"
+                    }}                  //PONER EL NUMERO DE ORDEM               
+                    >
+                        Agregar Servicios
 
-                </SafeAreaView>
-
-            </StatusBar>
-
+                    </Text>    
+                </View>
+                <View style={{
+                    height: 1,
+                    backgroundColor: "#2A2F36",
+                    width: "100%"
+                }}>
+                </View>
+                <View style={{
+                    marginTop: 20
+                }}>
+                    <Text style={[styles.carTitle]}>Servicios Comunes</Text>                  
+                </View>
+                <View style={{
+                    marginTop: 1
+                }}>
+                    <Text style={[styles.subText]}>Selecciona uno o mas servicios requeridos para este vehiculo</Text>  
+                </View>
+                <FlatList style={{marginTop: 25}}
+                    data={servicesData}
+                    renderItem={({ item }) => <Service 
+                        name={item.name}
+                        description={item.description}
+                        />}
+                    keyExtractor={item => item.id}
+                    ItemSeparatorComponent={()=> (
+                        <View style={styles.hr}></View>
+                    )}
+                    showsVerticalScrollIndicator={false}
+                />                                  
+                <Pressable style={styles.productButton}>               
+                    <Text style={styles.productButtonText}>Servicio Personalizado</Text>
+                </Pressable>
+                <View style={{flexDirection:"row", gap:15}}>
+                    <View style={[styles.card, styles.half]}>
+                        <Text style={[styles.subText]}>Nuevos Servicios</Text>  
+                        <Text style={styles.carTitle}>3</Text>
+                    </View>
+                    <Pressable style={[styles.primaryButton, styles.half]}>
+                        <Text style={styles.primaryButtonText}>Continuar</Text>
+                    </Pressable>
+                </View>
+ 
+            </SafeAreaView>
         </SafeAreaProvider>
+
     );
+//PRESSABLE 'SERVICIO PERSONALIZADO' OPCIONAL PERO ESTARIA PERRO QUE JALE
+//PRESSABLE 'AGREGAR' ACTUALIZAR ORDEN AGREGANDO LOS SERVICIOS SELECCIONADOS
+//NUEVOS SERVICIOS IGUAL OPCIONAL +1 CADA QUE SE SELECCIONA UN SERVICIO
+    
 }
 
 const styles = StyleSheet.create({
@@ -46,6 +238,11 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#0F1115",
         paddingHorizontal: 18,
+    },
+    hr: {
+        height: 1,
+        backgroundColor: "#2A2F36",
+        width: "100%",
     },
     sectionLabel: {
         color: "#8B90A0",
@@ -57,8 +254,9 @@ const styles = StyleSheet.create({
     card: {
         backgroundColor: "#1A1D24",
         borderRadius: 20,
-        padding: 20,
-        marginBottom: 25,
+        padding: 10,
+        alignItems: "flex-start",
+        marginTop:10
     },
     rowBetween: {
         flexDirection: "row",
@@ -75,6 +273,12 @@ const styles = StyleSheet.create({
         fontSize: 13,
         marginTop: 4,
     },
+    serviceTitle: {
+        color: "#ffff",
+        fontSize: 16,
+        marginTop: 4,
+        maxWidth: 280
+    },
     badge: {
         backgroundColor: "rgba(255,212,59,0.15)",
         paddingHorizontal: 12,
@@ -88,10 +292,10 @@ const styles = StyleSheet.create({
     },
     primaryButton: {
         backgroundColor: "#FFD43B",
-        paddingVertical: 14,
+        paddingVertical: 20,
         borderRadius: 15,
         alignItems: "center",
-        marginTop: 20,
+        marginTop:10,
         flexDirection: "row",
         justifyContent: "center",
         gap: 8,
@@ -99,6 +303,7 @@ const styles = StyleSheet.create({
     primaryButtonText: {
         color: "#000",
         fontWeight: "700",
+        fontSize: 20
     },
     secondaryButtonText: {
         color: "#ffff",
@@ -218,6 +423,10 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "center",
         gap: 8,
+    },
+    productButtonText: {
+        color: "#fff",
+        fontWeight: "700",
     },
     serviceButton: {
         backgroundColor: "#111827",
