@@ -5,18 +5,16 @@ import {
     StyleSheet,
     ScrollView,
     TouchableOpacity,
-    Image,
-    Pressable,
-    Animated,
 } from "react-native";
 import {
     SafeAreaProvider,
     SafeAreaView,
     useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import BottomNav from "../components/BottomNav";
+import OrderCard from "../components/OrderCard";
 
 const HomeScreen = ({ navigation }) => {
     const [expandedId, setExpandedId] = useState(null);
@@ -118,159 +116,6 @@ const HomeScreen = ({ navigation }) => {
                 <BottomNav active="Home" />
             </SafeAreaView>
         </SafeAreaProvider>
-    );
-};
-
-const OrderCard = ({ type, vehicleYear, vehicleBrand, vehicleModel, vehiclePlate, services, notes, time, mileage, navigation, expandedId, setExpandedId }) => {
-    const isExpanded = expandedId === `${type}-${vehiclePlate}`;
-    
-    const handlePress = () => {
-        setExpandedId(isExpanded ? null : `${type}-${vehiclePlate}`);
-    };
-
-    const getIconConfig = () => {
-        switch (type) {
-            case 'active':
-                return { iconFamily: 'Feather', icon: 'tool', bgColor: '#FFD43B', stripColor: '#FFD43B' };
-            case 'upcoming':
-                return { iconFamily: 'Ionicons', icon: 'time-outline', bgColor: '#FFD43B', stripColor: null };
-            case 'completed':
-                return { iconFamily: 'Ionicons', icon: 'checkmark', bgColor: '#1E7D32', stripColor: null, color: '#fff' };
-            default:
-                return { iconFamily: 'Feather', icon: 'tool', bgColor: '#FFD43B', stripColor: '#FFD43B' };
-        }
-    };
-
-    const iconConfig = getIconConfig();
-
-    const renderIcon = () => {
-        const iconProps = { size: 20, color: iconConfig.color || "#000" };
-        if (iconConfig.iconFamily === 'Ionicons') {
-            return <Ionicons name={iconConfig.icon} {...iconProps} />;
-        }
-        return <Feather name={iconConfig.icon} {...iconProps} />;
-    };
-
-    const vehicleText = `${vehicleYear} ${vehicleBrand} ${vehicleModel} • ${vehiclePlate}`;
-
-    const getStatusText = () => {
-        switch (type) {
-            case 'active': return 'EN PROGRESO';
-            case 'upcoming': return 'PROGRAMADO';
-            case 'completed': return 'COMPLETADO';
-            default: return '';
-        }
-    };
-
-    const getStatusStyle = () => {
-        switch (type) {
-            case 'active': return styles.inProgress;
-            case 'upcoming': return styles.scheduled;
-            case 'completed': return styles.completed;
-            default: return {};
-        }
-    };
-
-    return (
-        <View style={styles.orderCard}>
-            {type === 'active' && <View style={[styles.yellowStrip, { backgroundColor: iconConfig.stripColor }]} />}
-
-            <View style={[styles.iconContainer, { backgroundColor: iconConfig.bgColor }]}>
-                {renderIcon()}
-            </View>
-
-            <TouchableOpacity style={{ flex: 1 }} onPress={handlePress} activeOpacity={0.8}>
-                <View style={styles.rowBetween}>
-                    <Text style={getStatusStyle()}>{getStatusText()}</Text>
-                    <View style={styles.timeRow}>
-                        <Text style={styles.since}>
-                            {type === 'active' ? `Desde las ${time}` : time}
-                        </Text>
-                        <Ionicons 
-                            name={isExpanded ? "chevron-up" : "chevron-down"} 
-                            size={16} 
-                            color="#777" 
-                            style={{ marginLeft: 8 }}
-                        />
-                    </View>
-                </View>
-
-                <Text style={styles.jobTitle}>{vehicleText}</Text>
-
-                {isExpanded && (
-                    <View style={styles.expandedContent}>
-                        {services.map((item) => (
-                            <Service
-                                key={item.id}
-                                title={item.title}
-                                status={item.status}
-                            />
-                        ))}
-
-                        {(type === 'active' || type === 'upcoming') && notes && (
-                            <View style={styles.notesSection}>
-                                <View style={styles.notesHeader}>
-                                    <Ionicons name="document-text-outline" size={14} color="#FFD43B" />
-                                    <Text style={styles.notesLabel}>Notas del cliente</Text>
-                                </View>
-                                <Text style={styles.notesText}>{notes}</Text>
-                            </View>
-                        )}
-
-                        <TouchableOpacity 
-                            style={styles.detailsButton} 
-                            onPress={() => {
-                                const serviceInfo = services.map(s => s.title).join(', ') || 'Servicio general';
-                                if (type === 'completed') {
-                                    navigation.navigate('LastService', { 
-                                        vehicle: `${vehicleYear} ${vehicleBrand} ${vehicleModel}`,
-                                        plate: vehiclePlate,
-                                        service: serviceInfo,
-                                        mileage: mileage,
-                                        notes: notes || ''
-                                    });
-                                } else {
-                                    navigation.navigate('NextService', { 
-                                        vehicle: `${vehicleYear} ${vehicleBrand} ${vehicleModel}`,
-                                        plate: vehiclePlate,
-                                        service: serviceInfo,
-                                        mileage: mileage,
-                                        notes: notes || ''
-                                    });
-                                }
-                            }}
-                        >
-                            <Text style={styles.detailsButtonText}>Detalles</Text>
-                            <Feather name="chevron-right" size={14} color="#FFD43B" />
-                        </TouchableOpacity>
-                    </View>
-                )}
-            </TouchableOpacity>
-        </View>
-    );
-};
-
-const Service = ({ title, status }) => {
-    const renderIcon = () => {
-        switch (status) {
-            case "Finalizado":
-                return (
-                    <Feather name="check-circle" size={18} color="#22C55E" />
-                );
-            case "En Proceso":
-                return <Feather name="clock" size={18} color="#FFD43B" />;
-            case "Pendiente":
-                return <Feather name="x-circle" size={18} color="#EF4444" />;
-            default:
-                return null;
-        }
-    };
-
-    return (
-        <View style={styles.servicesRow}>
-            <Text style={styles.servicesText}>•  {title}</Text>
-            {renderIcon()}
-        </View>
     );
 };
 

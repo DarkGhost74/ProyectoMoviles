@@ -1,0 +1,250 @@
+import React from "react";
+import { View, Text, TouchableOpacity } from "react-native";
+import { Ionicons, Feather } from "@expo/vector-icons";
+import Service from "./Service";
+
+const OrderCard = ({ type, vehicleYear, vehicleBrand, vehicleModel, vehiclePlate, services, notes, time, mileage, navigation, expandedId, setExpandedId }) => {
+    const isExpanded = expandedId === `${type}-${vehiclePlate}`;
+    
+    const handlePress = () => {
+        setExpandedId(isExpanded ? null : `${type}-${vehiclePlate}`);
+    };
+
+    const getIconConfig = () => {
+        switch (type) {
+            case 'active':
+                return { iconFamily: 'Feather', icon: 'tool', bgColor: '#FFD43B', stripColor: '#FFD43B' };
+            case 'upcoming':
+                return { iconFamily: 'Ionicons', icon: 'time-outline', bgColor: '#FFD43B', stripColor: null };
+            case 'completed':
+                return { iconFamily: 'Ionicons', icon: 'checkmark', bgColor: '#1E7D32', stripColor: null, color: '#fff' };
+            default:
+                return { iconFamily: 'Feather', icon: 'tool', bgColor: '#FFD43B', stripColor: '#FFD43B' };
+        }
+    };
+
+    const iconConfig = getIconConfig();
+
+    const renderIcon = () => {
+        const iconProps = { size: 20, color: iconConfig.color || "#000" };
+        if (iconConfig.iconFamily === 'Ionicons') {
+            return <Ionicons name={iconConfig.icon} {...iconProps} />;
+        }
+        return <Feather name={iconConfig.icon} {...iconProps} />;
+    };
+
+    const vehicleText = `${vehicleYear} ${vehicleBrand} ${vehicleModel} • ${vehiclePlate}`;
+
+    const getStatusText = () => {
+        switch (type) {
+            case 'active': return 'EN PROGRESO';
+            case 'upcoming': return 'PROGRAMADO';
+            case 'completed': return 'COMPLETADO';
+            default: return '';
+        }
+    };
+
+    const getStatusStyle = () => {
+        switch (type) {
+            case 'active': return styles.inProgress;
+            case 'upcoming': return styles.scheduled;
+            case 'completed': return styles.completed;
+            default: return {};
+        }
+    };
+
+    return (
+        <View style={styles.orderCard}>
+            {type === 'active' && <View style={[styles.yellowStrip, { backgroundColor: iconConfig.stripColor }]} />}
+
+            <View style={[styles.iconContainer, { backgroundColor: iconConfig.bgColor }]}>
+                {renderIcon()}
+            </View>
+
+            <TouchableOpacity style={{ flex: 1 }} onPress={handlePress} activeOpacity={0.8}>
+                <View style={styles.rowBetween}>
+                    <Text style={getStatusStyle()}>{getStatusText()}</Text>
+                    <View style={styles.timeRow}>
+                        <Text style={styles.since}>
+                            {type === 'active' ? `Desde las ${time}` : time}
+                        </Text>
+                        <Ionicons 
+                            name={isExpanded ? "chevron-up" : "chevron-down"} 
+                            size={16} 
+                            color="#777" 
+                            style={{ marginLeft: 8 }}
+                        />
+                    </View>
+                </View>
+
+                <Text style={styles.jobTitle}>{vehicleText}</Text>
+
+                {isExpanded && (
+                    <View style={styles.expandedContent}>
+                        {services.map((item) => (
+                            <Service
+                                key={item.id}
+                                title={item.title}
+                                status={item.status}
+                            />
+                        ))}
+
+                        {(type === 'active' || type === 'upcoming') && notes && (
+                            <View style={styles.notesSection}>
+                                <View style={styles.notesHeader}>
+                                    <Ionicons name="document-text-outline" size={14} color="#FFD43B" />
+                                    <Text style={styles.notesLabel}>Notas del cliente</Text>
+                                </View>
+                                <Text style={styles.notesText}>{notes}</Text>
+                            </View>
+                        )}
+
+                        <TouchableOpacity 
+                            style={styles.detailsButton} 
+                            onPress={() => {
+                                const serviceInfo = services.map(s => s.title).join(', ') || 'Servicio general';
+                                if (type === 'completed') {
+                                    navigation.navigate('LastService', { 
+                                        vehicle: `${vehicleYear} ${vehicleBrand} ${vehicleModel}`,
+                                        plate: vehiclePlate,
+                                        service: serviceInfo,
+                                        mileage: mileage,
+                                        notes: notes || ''
+                                    });
+                                } else {
+                                    navigation.navigate('NextService', { 
+                                        vehicle: `${vehicleYear} ${vehicleBrand} ${vehicleModel}`,
+                                        plate: vehiclePlate,
+                                        service: serviceInfo,
+                                        mileage: mileage,
+                                        notes: notes || ''
+                                    });
+                                }
+                            }}
+                        >
+                            <Text style={styles.detailsButtonText}>Detalles</Text>
+                            <Feather name="chevron-right" size={14} color="#FFD43B" />
+                        </TouchableOpacity>
+                    </View>
+                )}
+            </TouchableOpacity>
+        </View>
+    );
+};
+
+const styles = {
+    orderCard: {
+        flexDirection: "row",
+        backgroundColor: "#1A1D23",
+        borderRadius: 20,
+        padding: 18,
+        marginBottom: 20,
+    },
+
+    yellowStrip: {
+        width: 4,
+        backgroundColor: "#FFD43B",
+        borderRadius: 4,
+        marginRight: 12,
+    },
+
+    iconContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 12,
+    },
+
+    inProgress: {
+        color: "#FFD43B",
+        fontSize: 12,
+        fontWeight: "bold",
+    },
+
+    scheduled: {
+        color: "#3B82F6",
+        fontSize: 12,
+        fontWeight: "bold",
+    },
+
+    completed: {
+        color: "#22C55E",
+        fontSize: 12,
+        fontWeight: "bold",
+    },
+
+    since: {
+        color: "#777",
+        fontSize: 12,
+    },
+
+    timeRow: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+
+    expandedContent: {
+        marginTop: 12,
+    },
+
+    jobTitle: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "600",
+        marginTop: 8,
+    },
+
+    rowBetween: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
+
+    notesSection: {
+        marginTop: 16,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: "#2A2D35",
+    },
+
+    notesHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 6,
+        gap: 6,
+    },
+
+    notesLabel: {
+        color: "#FFD43B",
+        fontSize: 12,
+        fontWeight: "600",
+    },
+
+    notesText: {
+        color: "#888",
+        fontSize: 13,
+        lineHeight: 18,
+    },
+
+    detailsButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 12,
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: "#FFD43B",
+    },
+
+    detailsButtonText: {
+        color: "#FFD43B",
+        fontSize: 13,
+        fontWeight: "600",
+        marginRight: 4,
+    },
+};
+
+export default OrderCard;
