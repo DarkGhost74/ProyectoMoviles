@@ -8,14 +8,16 @@ import {
     StatusBar,
     KeyboardAvoidingView,
     Platform,
-    Alert, // 🔥 NUEVO: Para mostrar errores
-    ActivityIndicator, // 🔥 NUEVO: Para mostrar un icono de carga
+    ActivityIndicator,
+    ScrollView,
+    Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
-// 🔥 NUEVO: Importaciones de Firebase
+//Importaciones de Firebase
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { app } from "../firebaseConfig"; 
 
@@ -40,13 +42,26 @@ export default function LoginScreen({ navigation }) {
     const [emailFocused, setEmailFocused] = useState(false);
     const [passwordFocused, setPasswordFocused] = useState(false);
     
-    // 🔥 NUEVO: Estado para bloquear el botón mientras carga
     const [isLoading, setIsLoading] = useState(false);
 
-    // 🔥 NUEVO: Función principal de autenticación
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalConfig, setModalConfig] = useState({
+        title: "",
+        message: "",
+        type: "error",
+    });
+
+    const showModal = (title, message, type = "error") => {
+        setModalConfig({ title, message, type });
+        setModalVisible(true);
+    };
+
+    const hideModal = () => {
+        setModalVisible(false);
+    };
     const handleLogin = async () => {
         if (!email || !password) {
-            Alert.alert("Error", "Por favor ingresa tu correo y contraseña.");
+            showModal("Error", "Por favor ingresa tu correo y contraseña.");
             return;
         }
 
@@ -58,7 +73,7 @@ export default function LoginScreen({ navigation }) {
             
             console.log("¡Usuario autenticado en Firebase! UID:", user.uid);
             
-            // Enviamos el UID a nuestro servidor Node.js
+            // Enviamos el UID al servidor Node.js
             const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/verify`, {
                 method: "POST",
                 headers: {
@@ -73,25 +88,24 @@ export default function LoginScreen({ navigation }) {
             if (!response.ok) {
                 // Cerramos la sesión en Firebase para que no se quede pegado
                 await auth.signOut();
-                Alert.alert("Acceso Denegado", data.error || "No estás registrado en el sistema del taller.");
+                showModal("Acceso Denegado", data.error || "No estás registrado en el sistema del taller.");
                 return;
             }
 
             console.log("Datos desde PostgreSQL:", data.user);
             
             // Si todo sale bien, pasamos al Home
-            // El Home ahora podrá saber si es Mecánico o Recepcionista viendo data.user.rol
             navigation.replace("Home", { userData: data.user });
 
         } catch (error) {
             console.error("Error de Firebase:", error.code);
             // Manejo de errores en español para el usuario
             if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                Alert.alert("Acceso Denegado", "El correo o la contraseña son incorrectos.");
+                showModal("Acceso Denegado", "El correo o la contraseña son incorrectos.");
             } else if (error.code === 'auth/invalid-email') {
-                Alert.alert("Error", "El formato del correo no es válido.");
+                showModal("Error", "El formato del correo no es válido.");
             } else {
-                Alert.alert("Error", "Ocurrió un problema al iniciar sesión. Intenta de nuevo.");
+                showModal("Error", "Ocurrió un problema al iniciar sesión. Intenta de nuevo.");
             }
         } finally {
             setIsLoading(false);
@@ -102,10 +116,15 @@ export default function LoginScreen({ navigation }) {
         <SafeAreaView style={styles.safeArea}>
             <StatusBar barStyle="light-content" backgroundColor="#1a1a1a" />
             <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : undefined}
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
+                keyboardVerticalOffset={Platform.OS === "android" ? 0 : 0}
             >
-                <View style={styles.scrollContent}>
+                <ScrollView 
+                    contentContainerStyle={styles.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
                     {/* Header / Logo */}
                     <View style={styles.header}>
                         <CarShopIcon />
@@ -143,7 +162,7 @@ export default function LoginScreen({ navigation }) {
                                     autoCorrect={false}
                                     onFocus={() => setEmailFocused(true)}
                                     onBlur={() => setEmailFocused(false)}
-                                    editable={!isLoading} // 🔥 NUEVO: Bloquear si está cargando
+                                    editable={!isLoading} //Bloquear si está cargando
                                 />
                             </View>
                         </View>
@@ -167,7 +186,7 @@ export default function LoginScreen({ navigation }) {
                                     secureTextEntry={!showPassword}
                                     onFocus={() => setPasswordFocused(true)}
                                     onBlur={() => setPasswordFocused(false)}
-                                    editable={!isLoading} // 🔥 NUEVO: Bloquear si está cargando
+                                    editable={!isLoading} //Bloquear si está cargando
                                 />
                                 <TouchableOpacity
                                     onPress={() =>
@@ -221,7 +240,7 @@ export default function LoginScreen({ navigation }) {
                         </View>
 
                         {/* Sign In Button */}
-                        {/* 🔥 NUEVO: Conectado a la función handleLogin y muestra un loader */}
+                        {/* Conectado a la función handleLogin y muestra un loader */}
                         <TouchableOpacity
                             style={[styles.signInButton, isLoading && { opacity: 0.7 }]}
                             onPress={handleLogin}
@@ -241,7 +260,40 @@ export default function LoginScreen({ navigation }) {
                             para que te proporcione una nueva.
                         </Text>
                     </View>
-                </View>
+                </ScrollView>
+
+                <Modal
+                    visible={modalVisible}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={hideModal}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <View style={[
+                                styles.modalIconContainer,
+                                modalConfig.type === "success" && styles.modalIconSuccess
+                            ]}>
+                                {modalConfig.type === "success" ? (
+                                    <Ionicons name="checkmark-circle" size={36} color="#2ECC71" />
+                                ) : (
+                                    <Ionicons name="alert-circle" size={36} color="#FF4D4D" />
+                                )}
+                            </View>
+                            <Text style={styles.modalTitle}>{modalConfig.title}</Text>
+                            <Text style={styles.modalText}>{modalConfig.message}</Text>
+                            <TouchableOpacity
+                                style={[
+                                    styles.modalButton,
+                                    modalConfig.type === "success" && styles.modalButtonSuccess
+                                ]}
+                                onPress={hideModal}
+                            >
+                                <Text style={styles.modalButtonText}>Aceptar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
@@ -268,7 +320,6 @@ const styles = StyleSheet.create({
         paddingTop: 40,
         paddingBottom: 32,
         alignItems: "center",
-        padding: 24,
     },
 
     // ── Header ──────────────────────────────────────
@@ -475,5 +526,61 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: "800",
         color: YELLOW,
+    },
+
+    // ── Modal ─────────────────────────────────
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    modalContent: {
+        backgroundColor: CARD_BG,
+        borderRadius: 24,
+        padding: 28,
+        width: "85%",
+        alignItems: "center",
+    },
+    modalIconContainer: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 16,
+    },
+    modalIconSuccess: {
+        backgroundColor: "rgba(46, 204, 113, 0.2)",
+    },
+    modalTitle: {
+        fontSize: 22,
+        fontWeight: "800",
+        color: "#fff",
+        marginBottom: 8,
+        textAlign: "center",
+    },
+    modalText: {
+        fontSize: 15,
+        color: TEXT_MUTED,
+        textAlign: "center",
+        marginBottom: 24,
+        lineHeight: 22,
+    },
+    modalButton: {
+        backgroundColor: "#FF4D4D",
+        paddingVertical: 14,
+        paddingHorizontal: 48,
+        borderRadius: 14,
+        width: "100%",
+    },
+    modalButtonSuccess: {
+        backgroundColor: "#2ECC71",
+    },
+    modalButtonText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "700",
+        textAlign: "center",
     },
 });
