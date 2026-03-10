@@ -68,24 +68,19 @@ const LastServiceScreen = ({ navigation, route }) => {
       {/* Products */}
       <Text style={styles.sectionTitle}>PRODUCTOS UTILIZADOS</Text>
 
-      <View style={styles.productHeader}>
-        <Text style={styles.tableHeader}>SKU / MARCA</Text>
-        <Text style={styles.tableHeader}>PRODUCTO</Text>
-        <Text style={styles.tableHeader}>CANT.</Text>
-      </View>
-
       <ProductRow
         brand="Mobil 1"
-        sku="MOB-5W30-SYN"
-        name="Synthetic Oil 5W-30"
-        qty="4L"
+        name="Aceite Sintético 5W-30"
       />
 
       <ProductRow
         brand="Toyota Genuine"
-        sku="TOY-90915-10003"
-        name="Oil Filter Element"
-        qty="1u"
+        name="Filtro de Aceite"
+      />
+
+      <ProductRow
+        brand="Bosch"
+        name="Filtro de Aire"
       />
 
     </ScrollView>
@@ -102,17 +97,11 @@ const TableRow = ({ label, value }) => (
   </View>
 );
 
-const ProductRow = ({ brand, sku, name, qty }) => (
+const ProductRow = ({ brand, name }) => (
   <View style={styles.productRow}>
-    <View style={{ flex: 2 }}>
-      <Text style={styles.skuText}>{sku}</Text>
+    <View>
       <Text style={styles.brandText}>{brand}</Text>
-    </View>
-
-    <Text style={[styles.value, { flex: 2 }]}>{name}</Text>
-
-    <View style={styles.qtyBadge}>
-      <Text style={styles.qtyText}>{qty}</Text>
+      <Text style={styles.productName}>{name}</Text>
     </View>
   </View>
 );
@@ -206,15 +195,38 @@ const styles = StyleSheet.create({
     color: "#FFD43B",
     fontSize: 12,
     fontWeight: "600",
+    marginBottom: 8,
+  },
+
+  productHeader: {
+    marginBottom: 8,
   },
 
   productRow: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     backgroundColor: "#1A1D24",
-    padding: 12,
+    padding: 14,
     borderRadius: 12,
     marginBottom: 10,
+  },
+
+  brandText: {
+    color: "#FFD43B",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+
+  productName: {
+    color: "#fff",
+    fontSize: 13,
+    marginTop: 2,
+  },
+
+  value: {
+    color: "#fff",
+    fontSize: 13,
   },
 
   skuText: {

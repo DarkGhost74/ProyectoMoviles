@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import BottomNav from '../components/BottomNav';
@@ -17,12 +18,12 @@ const NextServiceScreen = ({ navigation, route }) => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color="white" />
+          <Feather name="arrow-left" size={24} color="white" />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Detalle de Próxima Orden</Text>
 
-        <MaterialCommunityIcons name="dots-vertical" size={24} color="white" />
+        <View style={{ width: 24 }} />
       </View>
 
       {/* Vehicle Card */}
@@ -30,7 +31,7 @@ const NextServiceScreen = ({ navigation, route }) => {
         <View style={styles.rowBetween}>
           <Text style={styles.carTitle}>{vehicle || 'Toyota Corolla 2022'}</Text>
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>SCHEDULED</Text>
+            <Text style={styles.badgeText}>PROGRAMADO</Text>
           </View>
         </View>
 
@@ -63,9 +64,6 @@ const NextServiceScreen = ({ navigation, route }) => {
 
           <View>
             <Text style={styles.serviceName}>{service || 'Servicio de mantenimiento'}</Text>
-            <Text style={styles.serviceDesc}>
-              Trabajo de mantenimiento preventivo planificado
-            </Text>
           </View>
         </View>
 
@@ -73,27 +71,26 @@ const NextServiceScreen = ({ navigation, route }) => {
 
         <DetailRow icon="speedometer" label="Kilometraje" value={mileage || '50,000 km'} />
         <DetailRow icon="calendar" label="Fecha de Inicio" value="15/02/2026" />
-        <DetailRow icon="clock-outline" label="Hora sugerida" value="09:00 AM" />
+        <DetailRow icon="clock" label="Hora Programada" value="09:00 AM" />
       </View>
 
-      {/* Notes Section */}
-      {notes && notes.length > 0 && (
-        <>
-          <Text style={styles.sectionTitle}>NOTAS DEL CLIENTE</Text>
+      {/* Notes and Check-in Row */}
+      <View style={styles.notesCheckInRow}>
+        {notes && notes.length > 0 && (
           <View style={styles.notesCard}>
+            <Text style={styles.notesSectionTitle}>NOTAS DEL CLIENTE</Text>
             <View style={styles.notesRow}>
-              <MaterialCommunityIcons name="document-text-outline" size={16} color="#FFD43B" />
+              <Feather name="file-text" size={16} color="#FFD43B" />
               <Text style={styles.notesText}>{notes}</Text>
             </View>
           </View>
-        </>
-      )}
+        )}
 
-      {/* Button */}
-      <TouchableOpacity style={styles.mainButton}>
-        <MaterialCommunityIcons name="account-check" size={20} color="black" />
-        <Text style={styles.buttonText}>Check-in</Text>
-      </TouchableOpacity>
+        {/* Check-in Button */}
+        <TouchableOpacity style={styles.checkInContainer}>
+          <Feather name="arrow-right" size={20} color="#FFD43B" />
+        </TouchableOpacity>
+      </View>
 
     </ScrollView>
     <BottomNav active="NextService" />
@@ -105,7 +102,7 @@ const NextServiceScreen = ({ navigation, route }) => {
 const DetailRow = ({ icon, label, value }) => (
   <View style={styles.detailRow}>
     <View style={styles.row}>
-      <MaterialCommunityIcons name={icon} size={18} color="#9CA3AF" />
+      <Feather name={icon} size={18} color="#9CA3AF" />
       <Text style={styles.detailLabel}>{label}</Text>
     </View>
 
@@ -242,29 +239,43 @@ const styles = StyleSheet.create({
     color: "white",
   },
 
-  mainButton: {
-    backgroundColor: "#FFD43B",
+  checkInContainer: {
     flexDirection: "row",
-    justifyContent: "center",
     alignItems: "center",
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 40,
+    justifyContent: "center",
+    backgroundColor: "#1A1D24",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#FFD43B",
+    gap: 8,
   },
 
-  buttonText: {
-    color: "black",
-    fontWeight: "bold",
-    marginLeft: 6,
+  checkInText: {
+    color: "#FFD43B",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+
+  notesCheckInRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+
+  notesSectionTitle: {
+    color: "#FFD43B",
+    fontSize: 12,
+    fontWeight: "600",
+    marginBottom: 8,
   },
 
   notesCard: {
     backgroundColor: "#1A1D24",
     borderRadius: 15,
     padding: 16,
-    marginBottom: 25,
-    borderTopWidth: 4,
-    borderTopColor: "#FFD43B",
+    flex: 1,
   },
 
   notesRow: {
@@ -278,5 +289,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     flex: 1,
+  },
+
+  checkInContainer: {
+    width: 70,
+    height: 70,
+    backgroundColor: "#1A1D24",
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#FFD43B",
   },
 });
