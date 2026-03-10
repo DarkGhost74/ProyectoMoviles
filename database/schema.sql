@@ -1,4 +1,10 @@
--- Independent Tables
+-- ==========================================
+-- CAR SHOP SERVICE - SCHEMA V2.1
+-- ==========================================
+
+-- ------------------------------------------
+-- 1. TABLAS INDEPENDIENTES (Catálogos)
+-- ------------------------------------------
 CREATE TABLE rol (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL
@@ -29,7 +35,17 @@ CREATE TABLE producto (
     precio_venta NUMERIC(10, 2) NOT NULL
 );
 
--- Dependent Tables
+CREATE TABLE servicio (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    descripcion TEXT,
+    precio_mano_obra NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
+    activo BOOLEAN DEFAULT TRUE
+);
+
+-- ------------------------------------------
+-- 2. TABLAS DEPENDIENTES (Nivel 1)
+-- ------------------------------------------
 CREATE TABLE usuario (
     id SERIAL PRIMARY KEY,
     firebase_uid VARCHAR(128) UNIQUE NOT NULL,
@@ -54,23 +70,18 @@ CREATE TABLE vehiculo (
     niv VARCHAR(17) UNIQUE
 );
 
--- Level 2 Dependent Tables
-CREATE TABLE reparacion (
+-- ------------------------------------------
+-- 3. TABLAS DEPENDIENTES (Nivel 2)
+-- ------------------------------------------
+CREATE TABLE orden (
     id SERIAL PRIMARY KEY,
     id_vehiculo INTEGER NOT NULL REFERENCES vehiculo (id) ON DELETE RESTRICT,
     id_mecanico INTEGER NOT NULL REFERENCES usuario (id) ON DELETE RESTRICT,
-    descripcion TEXT NOT NULL,
+    notas_cliente TEXT,
     kilometraje INTEGER NOT NULL,
-    estatus VARCHAR(20) NOT NULL CHECK (
-        estatus IN (
-            'Pendiente',
-            'En Progreso',
-            'Finalizado'
-        )
-    ),
-    precio_mano_obra NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
     fecha_inicio TIMESTAMP NOT NULL,
-    fecha_fin TIMESTAMP
+    fecha_fin TIMESTAMP,
+    total_orden NUMERIC(10, 2) NOT NULL DEFAULT 0.00
 );
 
 CREATE TABLE venta (
@@ -80,10 +91,27 @@ CREATE TABLE venta (
     fecha TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Level 3 Dependent Tables (Junction/Detail Tables)
-CREATE TABLE reparacion_producto (
+-- ------------------------------------------
+-- 4. TABLAS DE DETALLE E INTERMEDIAS (Nivel 3)
+-- ------------------------------------------
+CREATE TABLE orden_servicio (
     id SERIAL PRIMARY KEY,
-    id_reparacion INTEGER NOT NULL REFERENCES reparacion (id) ON DELETE CASCADE,
+    id_orden INTEGER NOT NULL REFERENCES orden (id) ON DELETE CASCADE,
+    id_servicio INTEGER NOT NULL REFERENCES servicio (id) ON DELETE RESTRICT,
+    estatus VARCHAR(20) NOT NULL DEFAULT 'Pendiente' CHECK (
+        estatus IN (
+            'Pendiente',
+            'En Progreso',
+            'Finalizado'
+        )
+    ),
+    descripcion_personalizada TEXT,
+    precio_personalizado NUMERIC(10, 2)
+);
+
+CREATE TABLE orden_producto (
+    id SERIAL PRIMARY KEY,
+    id_orden INTEGER NOT NULL REFERENCES orden (id) ON DELETE CASCADE,
     id_producto INTEGER NOT NULL REFERENCES producto (id) ON DELETE RESTRICT,
     cantidad INTEGER NOT NULL CHECK (cantidad > 0),
     precio_unitario NUMERIC(10, 2) NOT NULL,
