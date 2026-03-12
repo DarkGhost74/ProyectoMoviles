@@ -16,7 +16,7 @@ import BottomNav from "../components/BottomNav";
 import OrderCard from "../components/OrderCard";
 
 export default function OrdersScreen({ navigation }) {
-    const [expandedId, setExpandedId] = useState(`active-${ACTIVE_ORDER.vehiclePlate}`);
+    const [expandedId, setExpandedId] = useState(ACTIVE_ORDER ? `active-${ACTIVE_ORDER.vehiclePlate}` : null);
     const insets = useSafeAreaInsets();
     const groupedOrders = groupOrdersByDay(UPCOMING_ORDERS);
     return (
@@ -56,20 +56,32 @@ export default function OrdersScreen({ navigation }) {
                             Ordenes actuales
                         </Text>
                     </View>
-                    <OrderCard
-                        type="active"
-                        vehicleYear={ACTIVE_ORDER.vehicleYear}
-                        vehicleBrand={ACTIVE_ORDER.vehicleBrand}
-                        vehicleModel={ACTIVE_ORDER.vehicleModel}
-                        vehiclePlate={ACTIVE_ORDER.vehiclePlate}
-                        services={ACTIVE_ORDER.services}
-                        notes={ACTIVE_ORDER.notes}
-                        time={ACTIVE_ORDER.time}
-                        mileage={ACTIVE_ORDER.vehicleMileage}
-                        navigation={navigation}
-                        expandedId={expandedId}
-                        setExpandedId={setExpandedId}
-                    />
+                    {ACTIVE_ORDER ? (
+                        <OrderCard
+                            type="active"
+                            vehicleYear={ACTIVE_ORDER.vehicleYear}
+                            vehicleBrand={ACTIVE_ORDER.vehicleBrand}
+                            vehicleModel={ACTIVE_ORDER.vehicleModel}
+                            vehiclePlate={ACTIVE_ORDER.vehiclePlate}
+                            services={ACTIVE_ORDER.services}
+                            notes={ACTIVE_ORDER.notes}
+                            time={ACTIVE_ORDER.time}
+                            mileage={ACTIVE_ORDER.vehicleMileage}
+                            navigation={navigation}
+                            expandedId={expandedId}
+                            setExpandedId={setExpandedId}
+                        />
+                    ) : (
+                        <View style={styles.emptyState}>
+                            <Text style={styles.emptyText}>No hay órdenes activas</Text>
+                        </View>
+                    )}
+
+                    {UPCOMING_ORDERS.length === 0 && (
+                        <View style={styles.emptyState}>
+                            <Text style={styles.emptyText}>No hay órdenes próximas</Text>
+                        </View>
+                    )}
 
                     {/* UPCOMING */}
                     {dayOrder.map((day) => (
@@ -233,5 +245,17 @@ const styles = StyleSheet.create({
         letterSpacing: 1,
         marginBottom: 15,
         marginTop: 10,
+    },
+    emptyState: {
+        backgroundColor: "#1A1D23",
+        borderRadius: 20,
+        padding: 24,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 20,
+    },
+    emptyText: {
+        color: "#777",
+        fontSize: 14,
     },
 });

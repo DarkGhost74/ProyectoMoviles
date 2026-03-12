@@ -52,20 +52,26 @@ const HomeScreen = ({ navigation }) => {
 
                     <Text style={styles.sectionTitle}>Ordenes activas</Text>
 
-                    <OrderCard
-                        type="active"
-                        vehicleYear={ACTIVE_ORDER.vehicleYear}
-                        vehicleBrand={ACTIVE_ORDER.vehicleBrand}
-                        vehicleModel={ACTIVE_ORDER.vehicleModel}
-                        vehiclePlate={ACTIVE_ORDER.vehiclePlate}
-                        services={ACTIVE_ORDER.services}
-                        notes={ACTIVE_ORDER.notes}
-                        time={ACTIVE_ORDER.since}
-                        mileage={ACTIVE_ORDER.vehicleMileage}
-                        navigation={navigation}
-                        expandedId={expandedId}
-                        setExpandedId={setExpandedId}
-                    />
+                    {ACTIVE_ORDER ? (
+                        <OrderCard
+                            type="active"
+                            vehicleYear={ACTIVE_ORDER.vehicleYear}
+                            vehicleBrand={ACTIVE_ORDER.vehicleBrand}
+                            vehicleModel={ACTIVE_ORDER.vehicleModel}
+                            vehiclePlate={ACTIVE_ORDER.vehiclePlate}
+                            services={ACTIVE_ORDER.services}
+                            notes={ACTIVE_ORDER.notes}
+                            time={ACTIVE_ORDER.since}
+                            mileage={ACTIVE_ORDER.vehicleMileage}
+                            navigation={navigation}
+                            expandedId={expandedId}
+                            setExpandedId={setExpandedId}
+                        />
+                    ) : (
+                        <View style={styles.emptyState}>
+                            <Text style={styles.emptyText}>No hay órdenes activas</Text>
+                        </View>
+                    )}
 
                     <View style={styles.sectionRow}>
                         <Text style={styles.sectionTitle}>
@@ -76,23 +82,29 @@ const HomeScreen = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
 
-                    {UPCOMING_ORDERS.map((order) => (
-                        <OrderCard
-                            key={order.id}
-                            type="upcoming"
-                            vehicleYear={order.vehicleYear}
-                            vehicleBrand={order.vehicleBrand}
-                            vehicleModel={order.vehicleModel}
-                            vehiclePlate={order.vehiclePlate}
-                            services={order.services}
-                            notes={order.notes}
-                            time={order.time}
-                            mileage={order.vehicleMileage}
-                            navigation={navigation}
-                            expandedId={expandedId}
-                            setExpandedId={setExpandedId}
-                        />
-                    ))}
+                    {UPCOMING_ORDERS.length > 0 ? (
+                        UPCOMING_ORDERS.map((order) => (
+                            <OrderCard
+                                key={order.id}
+                                type="upcoming"
+                                vehicleYear={order.vehicleYear}
+                                vehicleBrand={order.vehicleBrand}
+                                vehicleModel={order.vehicleModel}
+                                vehiclePlate={order.vehiclePlate}
+                                services={order.services}
+                                notes={order.notes}
+                                time={order.time}
+                                mileage={order.vehicleMileage}
+                                navigation={navigation}
+                                expandedId={expandedId}
+                                setExpandedId={setExpandedId}
+                            />
+                        ))
+                    ) : (
+                        <View style={styles.emptyState}>
+                            <Text style={styles.emptyText}>No hay órdenes para hoy</Text>
+                        </View>
+                    )}
 
                     <View style={styles.sectionRow}>
                         <Text style={styles.sectionTitle}>
@@ -101,22 +113,28 @@ const HomeScreen = ({ navigation }) => {
                         <Text style={styles.subtle}>Ultimas 24h</Text>
                     </View>
 
-                    {COMPLETED_ORDERS.map((order) => (
-                        <OrderCard
-                            key={order.id}
-                            type="completed"
-                            vehicleYear={order.vehicleYear}
-                            vehicleBrand={order.vehicleBrand}
-                            vehicleModel={order.vehicleModel}
-                            vehiclePlate={order.vehiclePlate}
-                            services={order.services}
-                            time={order.time}
-                            mileage={order.vehicleMileage}
-                            navigation={navigation}
-                            expandedId={expandedId}
-                            setExpandedId={setExpandedId}
-                        />
-                    ))}
+                    {COMPLETED_ORDERS.length > 0 ? (
+                        COMPLETED_ORDERS.map((order) => (
+                            <OrderCard
+                                key={order.id}
+                                type="completed"
+                                vehicleYear={order.vehicleYear}
+                                vehicleBrand={order.vehicleBrand}
+                                vehicleModel={order.vehicleModel}
+                                vehiclePlate={order.vehiclePlate}
+                                services={order.services}
+                                time={order.time}
+                                mileage={order.vehicleMileage}
+                                navigation={navigation}
+                                expandedId={expandedId}
+                                setExpandedId={setExpandedId}
+                            />
+                        ))
+                    ) : (
+                        <View style={styles.emptyState}>
+                            <Text style={styles.emptyText}>No se han completado órdenes</Text>
+                        </View>
+                    )}
 
                     <View style={{ height: 120 }} />
                 </ScrollView>
@@ -600,5 +618,19 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 14,
         fontWeight: "600",
+    },
+
+    emptyState: {
+        backgroundColor: "#1A1D23",
+        borderRadius: 20,
+        padding: 24,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 20,
+    },
+
+    emptyText: {
+        color: "#777",
+        fontSize: 14,
     },
 });
