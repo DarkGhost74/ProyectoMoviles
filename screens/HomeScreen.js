@@ -54,6 +54,7 @@ const HomeScreen = ({ navigation }) => {
 
                     {ACTIVE_ORDER ? (
                         <OrderCard
+                            id={ACTIVE_ORDER.id}  // id -> No Modificar
                             type="active"
                             vehicleYear={ACTIVE_ORDER.vehicleYear}
                             vehicleBrand={ACTIVE_ORDER.vehicleBrand}
@@ -86,6 +87,7 @@ const HomeScreen = ({ navigation }) => {
                         UPCOMING_ORDERS.map((order) => (
                             <OrderCard
                                 key={order.id}
+                                id={order.id}  // id -> No Modificar
                                 type="upcoming"
                                 vehicleYear={order.vehicleYear}
                                 vehicleBrand={order.vehicleBrand}
@@ -117,6 +119,7 @@ const HomeScreen = ({ navigation }) => {
                         COMPLETED_ORDERS.map((order) => (
                             <OrderCard
                                 key={order.id}
+                                id={order.id}  // id -> No Modificar
                                 type="completed"
                                 vehicleYear={order.vehicleYear}
                                 vehicleBrand={order.vehicleBrand}
@@ -190,9 +193,9 @@ const ACTIVE_ORDER = {
     services: [
         { id: '1', title: 'Cambio alerón delantero', status: 'Finalizado' },
         { id: '2', title: 'Inspección de unidad de potencia', status: 'Pendiente' },
-        { id: '3', title: 'Reparación turbo', status: 'En Proceso' },
-        { id: '4', title: 'Cambio de discos carbono-ceramicos', status: 'En Proceso' },
-        { id: '5', title: 'Chequeo de fondo plano', status: 'En Proceso' },
+        { id: '3', title: 'Reparación turbo', status: 'En Progreso' },   // No Modificar -> Cambio: "En Proceso " -> "En progreso"
+        { id: '4', title: 'Cambio de discos carbono-ceramicos', status: 'En Progreso' },  // No Modificar -> Cambio: "En Proceso " -> "En progreso"
+        { id: '5', title: 'Chequeo de fondo plano', status: 'En Progreso' },  // No Modificar -> Cambio: "En Proceso " -> "En progreso"
         { id: '6', title: 'Cambio de llantas a compuesto blando', status: 'Pendiente' },
     ]
 }
