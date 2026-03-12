@@ -58,6 +58,7 @@ export default function OrdersScreen({ navigation }) {
                     </View>
                     {ACTIVE_ORDER ? (
                         <OrderCard
+                            id={ACTIVE_ORDER.id} // id -> No Modificar
                             type="active"
                             vehicleYear={ACTIVE_ORDER.vehicleYear}
                             vehicleBrand={ACTIVE_ORDER.vehicleBrand}
@@ -91,6 +92,7 @@ export default function OrdersScreen({ navigation }) {
                                 {groupedOrders[day].map((order) => (
                                     <OrderCard
                                         key={order.id}
+                                        id={order.id} // id -> No Modificar
                                         type="upcoming"
                                         vehicleYear={order.vehicleYear}
                                         vehicleBrand={order.vehicleBrand}
@@ -141,7 +143,7 @@ const ACTIVE_ORDER = {
     time: '09:00 AM',
     notes: 'Cambio de aceite y revisión general',
     services: [
-        { id: '1', title: 'Cambio de aceite', status: 'En Proceso' },
+        { id: '1', title: 'Cambio de aceite', status: 'En Progreso' }, // No Modificar -> Cambio: "En Proceso " -> "En progreso"
         { id: '2', title: 'Revisión de frenos', status: 'Pendiente' },
     ]
 };
