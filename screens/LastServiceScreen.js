@@ -11,6 +11,7 @@ import { Feather } from "@expo/vector-icons";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import BottomNav from "../components/BottomNav";
+import Service from "../components/Service";
 
 const LastServiceScreen = ({ navigation, route }) => {
     const { vehicle, plate, vehicleColor, service, mileage, notes, servicesList } = route.params || {};
@@ -77,35 +78,13 @@ const LastServiceScreen = ({ navigation, route }) => {
                     </Text>
 
                     <View style={styles.serviceCard}>
-                        {servicesList && servicesList.map((item, index) => {
-                            let iconName = 'clock';
-                            let iconColor = '#FFD43B';
-                            let statusText = 'En Proceso';
-                            
-                            if (item.status === 'Finalizado') {
-                                iconName = 'check-circle';
-                                iconColor = '#22C55E';
-                                statusText = 'Terminado';
-                            } else if (item.status === 'Pendiente') {
-                                iconName = 'x-circle';
-                                iconColor = '#EF4444';
-                                statusText = 'Pendiente';
-                            }
-                            
-                            return (
-                            <View key={item.id || index} style={styles.serviceItem}>
-                                <View style={styles.serviceItemLeft}>
-                                    <Feather 
-                                        name={iconName} 
-                                        size={32} 
-                                        color={iconColor} 
-                                    />
-                                    <Text style={styles.serviceItemText}>{item.title}</Text>
-                                </View>
-                                <Text style={[styles.serviceStatus, { color: iconColor }]}>{statusText}</Text>
-                            </View>
-                            );
-                        })}
+                        {servicesList && servicesList.map((item, index) => (
+                            <Service
+                                key={item.id || index}
+                                title={item.title}
+                                status={item.status}
+                            />
+                        ))}
                     </View>
 
                     {/* Service Data Card */}
@@ -201,8 +180,8 @@ const styles = StyleSheet.create({
 
     headerTitle: {
         color: "white",
-        fontSize: 32,
         fontWeight: "bold",
+        fontSize: 20,
     },
 
     card: {
@@ -214,31 +193,26 @@ const styles = StyleSheet.create({
 
     labelGold: {
         color: "#FFD43B",
-        fontSize: 14,
         marginBottom: 6,
     },
 
     carTitleLarge: {
         color: "white",
-        fontSize: 24,
         fontWeight: "600",
     },
 
     subText: {
         color: "#8B90A0",
         marginTop: 8,
-        fontSize: 16,
     },
 
     value: {
         color: "white",
-        fontSize: 18,
         marginTop: 6,
     },
 
     sectionTitle: {
         color: "#8B90A0",
-        fontSize: 22,
         marginBottom: 16,
     },
 
@@ -257,12 +231,10 @@ const styles = StyleSheet.create({
 
     tableLabel: {
         color: "#8B90A0",
-        fontSize: 16,
     },
 
     tableValue: {
         color: "white",
-        fontSize: 16,
     },
 
     productRow: {
@@ -277,13 +249,11 @@ const styles = StyleSheet.create({
 
     brandText: {
         color: "#FFD43B",
-        fontSize: 16,
         fontWeight: "600",
     },
 
     productName: {
         color: "#fff",
-        fontSize: 18,
         marginTop: 6,
     },
 
@@ -304,7 +274,6 @@ const styles = StyleSheet.create({
 
     notesText: {
         color: "#888",
-        fontSize: 16,
         lineHeight: 22,
         flex: 1,
     },
@@ -327,12 +296,10 @@ const styles = StyleSheet.create({
 
     serviceItemText: {
         color: "#fff",
-        fontSize: 20,
         flex: 1,
     },
 
     serviceStatus: {
-        fontSize: 16,
         fontWeight: "600",
     },
 });
