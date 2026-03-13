@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     View,
     Text,
@@ -17,12 +17,12 @@ import {
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import BottomNav from "../components/BottomNav";
-import { useNavigation } from "@react-navigation/native"; //NAVEGACION
+import { useNavigation, useRoute } from "@react-navigation/native"; //NAVEGACION
 import { descending } from "firebase/firestore/pipelines";
 import { Checkbox } from 'expo-checkbox';
-import { useState } from 'react';
 
-const servicesData = [                                           //CREAR LISTA SOLO FRONT, BACKEND CONSULTA -> JSON
+// No Modificar: servicesData -> INITIAL_SERVICES - paginacion API: (GET /api/v1/servicios?page=1&limit=7 - 15)
+const INITIAL_SERVICES = [                                           //CREAR LISTA SOLO FRONT, BACKEND CONSULTA -> JSON
     {
         id: "1",
         name: "Alineación y balanceo",
@@ -131,21 +131,68 @@ const servicesData = [                                           //CREAR LISTA S
 
 ];
 
-const Service = ({ name, description }) => (
-    <View style={{
-        paddingVertical: 12,
-        paddingHorizontal: 15
-    }}>
-        <Text style={styles.serviceTitle}>{name}</Text>
-        <Text style={styles.subText}>{description}</Text>
-    </View>
+// No modificar: Service -> SelectableService
+const SelectableService = ({ id, name, description, isSelected, onToggle }) => (
+    <Pressable 
+        style={{
+            paddingVertical: 12,
+            paddingHorizontal: 15,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+        }}
+        onPress={() => onToggle(id)}
+    >
+        <View style={{ flex: 1, paddingRight: 10 }}>
+            <Text style={styles.serviceTitle}>{name}</Text>
+            <Text style={styles.subText}>{description}</Text>
+        </View>
+        <Checkbox
+            value={isSelected}
+            onValueChange={() => onToggle(id)}
+            color={isSelected ? '#FFD43B' : undefined}
+        />
+    </Pressable>
 );
 
 export default function AddServiceScreen(){
     const navigation = useNavigation();
+    const route = useRoute(); // No modificar
     const insets = useSafeAreaInsets();
-    return(
 
+    const { orderId } = route.params || {}; // No modificar
+
+    // No modificar
+    const [availableServices, setAvailableServices] = useState(INITIAL_SERVICES);
+    const [selectedServiceIds, setSelectedServiceIds] = useState([]);
+
+    // No modificar: Función para manejar la selección de checkboxes
+    const toggleSelection = (serviceId) => {
+        setSelectedServiceIds((prevSelected) => {
+            if (prevSelected.includes(serviceId)) {
+                return prevSelected.filter(id => id !== serviceId); // Lo quita
+            } else {
+                return [...prevSelected, serviceId]; // Lo agrega
+            }
+        });
+    };
+
+    // No modificar Función para manejar el botón "Continuar"
+    const handleAddServicesToOrder = () => {
+        if (selectedServiceIds.length === 0) {
+            alert("Por favor selecciona al menos un servicio.");
+            return;
+        }
+
+        console.log(`Listo para hacer POST /api/v1/ordenes/${orderId}/servicios`);
+        console.log("Servicios seleccionados (IDs):", selectedServiceIds);
+        
+        // fetch()
+        // ...
+        navigation.goBack();
+    };
+
+    return(
         <SafeAreaProvider>
             <SafeAreaView
                 style={[styles.container, { }]}
@@ -172,14 +219,13 @@ export default function AddServiceScreen(){
                     style={{
                         color: "#ffff",
                         fontSize: 18,
-                        fontWeight: "",
+                        fontWeight: "bold",
                         marginLeft: 0,
                         flex: 1,
                         textAlign: "center"
-                    }}                  //PONER EL NUMERO DE ORDEM               
-                    >
-                        Agregar Servicios
-
+                    }}                             
+                    > 
+                        Orden #{orderId || '---'} {/* No modificar */}
                     </Text>    
                 </View>
                 <View style={{
@@ -191,34 +237,55 @@ export default function AddServiceScreen(){
                 <View style={{
                     marginTop: 20
                 }}>
-                    <Text style={[styles.carTitle]}>Servicios Comunes</Text>                  
+                    <Text style={[styles.carTitle]}>Catálogo de Servicios</Text>                  
                 </View>
                 <View style={{
                     marginTop: 1
                 }}>
                     <Text style={[styles.subText]}>Selecciona uno o mas servicios requeridos para este vehiculo</Text>  
                 </View>
-                <FlatList style={{marginTop: 25}}
-                    data={servicesData}
-                    renderItem={({ item }) => <Service 
-                        name={item.name}
-                        description={item.description}
-                        />}
+
+                {/* No modificar */}
+                <FlatList 
+                    style={{marginTop: 25}}
+                    data={availableServices}
                     keyExtractor={item => item.id}
-                    ItemSeparatorComponent={()=> (
-                        <View style={styles.hr}></View>
+                    renderItem={({ item }) => (
+                        <SelectableService
+                            id={item.id} 
+                            name={item.name}
+                            description={item.description}
+                            isSelected={selectedServiceIds.includes(item.id)}
+                            onToggle={toggleSelection}
+                        />
                     )}
+                    ItemSeparatorComponent={()=> <View style={styles.hr} />}
                     showsVerticalScrollIndicator={false}
+                    // No Modificar: boton paginacion api
+                    ListFooterComponent={() => (
+                        <TouchableOpacity style={{ padding: 20, alignItems: 'center' }}>
+                            <Text style={{ color: '#FFD43B' }}>Cargar más servicios...</Text>
+                        </TouchableOpacity>                        
+                    )}
                 />                                  
                 <Pressable style={styles.productButton}>               
                     <Text style={styles.productButtonText}>Servicio Personalizado</Text>
                 </Pressable>
-                <View style={{flexDirection:"row", gap:15}}>
+
+                <View style={{flexDirection:"row", gap:15, marginTop: 15, marginBottom: 20}}>
                     <View style={[styles.card, styles.half]}>
                         <Text style={[styles.subText]}>Nuevos Servicios</Text>  
-                        <Text style={styles.carTitle}>3</Text>
+                        <Text style={styles.carTitle}>{selectedServiceIds.length}</Text> {/* No modificar: Contador dinámico */}
                     </View>
-                    <Pressable style={[styles.primaryButton, styles.half]}>
+                    <Pressable 
+                        style={[
+                            styles.primaryButton,
+                            styles.half,
+                            { opacity: selectedServiceIds.length > 0 ? 1 : 0.5 }
+                            ]}
+                            onPress={handleAddServicesToOrder}
+                            disabled={selectedServiceIds.length === 0}
+                    >
                         <Text style={styles.primaryButtonText}>Continuar</Text>
                     </Pressable>
                 </View>
