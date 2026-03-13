@@ -13,7 +13,7 @@ import {
     SafeAreaView,
     useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { MaterialCommunityIcons, Feather } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { useNavigation } from "@react-navigation/native"; //NAVEGACION
 import VehicleCard from "../components/VehicleCard";
@@ -169,9 +169,11 @@ const OrderDetailsScreen = ({ navigation, route }) => {
                     </View>
                     <VehicleCard
                         status="active"
-                        vehicleYear={vehicle ? vehicle.split(' ')[0] : ''}
-                        vehicleBrand={vehicle ? vehicle.split(' ')[1] : ''}
-                        vehicleModel={vehicle ? vehicle.split(' ').slice(2).join(' ') : ''}
+                        vehicleYear={vehicle ? vehicle.split(" ")[0] : ""}
+                        vehicleBrand={vehicle ? vehicle.split(" ")[1] : ""}
+                        vehicleModel={
+                            vehicle ? vehicle.split(" ").slice(2).join(" ") : ""
+                        }
                         owner="Pedro Maromas"
                         color={vehicleColor || "Blanco Perlado"}
                         plate={plate || "ABC-1234"}
@@ -195,9 +197,16 @@ const OrderDetailsScreen = ({ navigation, route }) => {
                         />
                     </View>
                     <View style={[styles.card, { borderWidth: 1 }]}>
-                        <Text style={styles.notesSectionTitle}>
-                            NOTAS DEL CLIENTE
-                        </Text>
+                        <View style={styles.notesHeader}>
+                            <Ionicons
+                                name="document-text-outline"
+                                size={14}
+                                color="#FFD43B"
+                            />
+                            <Text style={styles.notesSectionTitle}>
+                                Notas del cliente
+                            </Text>
+                        </View>
                         <Text
                             style={[
                                 { fontSize: 15 },
@@ -355,11 +364,16 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         borderRadius: 12,
     },
+    notesHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 6,
+        gap: 6,
+    },
     notesSectionTitle: {
         color: "#FFD43B",
         fontSize: 12,
         fontWeight: "600",
-        marginBottom: 8,
     },
     smallButtonText: {
         color: "#000",

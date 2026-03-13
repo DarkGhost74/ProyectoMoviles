@@ -3,55 +3,106 @@ import {
     View,
     Text,
     StyleSheet,
-    ScrollView,
     TouchableOpacity,
+    ScrollView,
+    Pressable,
 } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Feather } from "@expo/vector-icons";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import {
+    SafeAreaProvider,
+    useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import { MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
-import BottomNav from "../components/BottomNav";
 import Service from "../components/Service";
 import VehicleCard from "../components/VehicleCard";
 
 const LastServiceScreen = ({ navigation, route }) => {
-    const { vehicle, plate, vehicleColor, vehicleVIN, service, mileage, notes, servicesList } = route.params || {};
+    const {
+        orderId,
+        vehicle,
+        plate,
+        vehicleColor,
+        vehicleVIN,
+        service,
+        mileage,
+        notes,
+        servicesList,
+    } = route.params || {};
+    const insets = useSafeAreaInsets();
+
+    const startDate = "10/01/2026";
+    const startTime = "09:00 AM";
+    const endDate = "10/01/2026";
+    const endTime = "02:30 PM";
+
+    const productsList = [
+        {
+            id: "1",
+            name: "Aceite Sintético 5W-30",
+            brand: "Mobil 1",
+            quantity: 1,
+        },
+        {
+            id: "2",
+            name: "Filtro de Aceite",
+            brand: "Toyota Genuine",
+            quantity: 1,
+        },
+        { id: "3", name: "Filtro de Aire", brand: "Bosch", quantity: 1 },
+    ];
 
     return (
         <SafeAreaProvider>
             <StatusBar style="light" />
-            <SafeAreaView style={styles.container} edges={["top"]}>
+            <View style={styles.container}>
+                <View
+                    style={{ height: insets.top, backgroundColor: "#0F1115" }}
+                />
                 <ScrollView
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: 100 }}
+                    contentContainerStyle={{
+                        paddingBottom: insets.bottom + 20,
+                    }}
                 >
-                    {/* Header */}
-                    <View style={styles.header}>
-                        <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            paddingHorizontal: 15,
+                            paddingVertical: 10,
+                            backgroundColor: "#0F1115",
+                        }}
+                    >
+                        <Pressable
+                            onPress={() => navigation.goBack()}
+                            hitSlop={12}
+                            style={{ padding: 1 }}
+                        >
                             <MaterialCommunityIcons
                                 name="arrow-left"
                                 size={24}
-                                color="white"
+                                color={"#ffff"}
                             />
-                        </TouchableOpacity>
-
-                        <Text style={styles.headerTitle}>
-                            Detalle de Orden Pasada
+                        </Pressable>
+                        <Text
+                            style={{
+                                color: "#ffff",
+                                fontSize: 24,
+                                fontWeight: "bold",
+                                marginLeft: 20,
+                            }}
+                        >
+                            Orden #{orderId || "---"}
                         </Text>
-
-                        <MaterialCommunityIcons
-                            name="dots-vertical"
-                            size={24}
-                            color="white"
-                        />
                     </View>
 
-                    {/* Vehicle Card */}
                     <VehicleCard
                         status="completed"
-                        vehicleYear={vehicle ? vehicle.split(' ')[0] : ''}
-                        vehicleBrand={vehicle ? vehicle.split(' ')[1] : ''}
-                        vehicleModel={vehicle ? vehicle.split(' ').slice(2).join(' ') : ''}
+                        vehicleYear={vehicle ? vehicle.split(" ")[0] : ""}
+                        vehicleBrand={vehicle ? vehicle.split(" ")[1] : ""}
+                        vehicleModel={
+                            vehicle ? vehicle.split(" ").slice(2).join(" ") : ""
+                        }
                         owner="Juan Pérez"
                         color={vehicleColor || "Silver"}
                         plate={plate || "ABC-1234"}
@@ -59,94 +110,87 @@ const LastServiceScreen = ({ navigation, route }) => {
                         vin={vehicleVIN || "1B3HB48M2X8D12345"}
                     />
 
-                    {/* Services Card */}
-                    <Text style={styles.sectionTitle}>
-                        SERVICIOS
-                    </Text>
-
-                    <View style={styles.serviceCard}>
-                        {servicesList && servicesList.map((item, index) => (
-                            <Service
-                                key={item.id || index}
-                                title={item.title}
-                                status={item.status}
-                            />
-                        ))}
+                    <View style={styles.card}>
+                        <Text style={styles.cardTitle}>Servicios</Text>
+                        {servicesList &&
+                            servicesList.map((item, index) => (
+                                <Service
+                                    key={item.id || index}
+                                    title={item.title}
+                                    status={item.status}
+                                />
+                            ))}
                     </View>
 
-                    {/* Service Data Card */}
-                    <Text style={styles.sectionTitle}>
-                        DATOS DEL SERVICIO
-                    </Text>
-
-                    <View style={styles.serviceCard}>
-                        <TableRow
-                            label="Kilometraje"
-                            value={mileage || "45,000 km"}
-                        />
-                        <TableRow label="Fecha de Inicio" value="10/01/2026" />
-                        <TableRow
-                            label="Fecha de Finalización"
-                            value="10/01/2026"
-                        />
-                    </View>
-
-                    {/* Notes Section */}
-                    {notes && notes.length > 0 && (
-                        <>
-                            <Text style={styles.sectionTitle}>
-                                NOTAS DEL CLIENTE
+                    <View style={styles.card}>
+                        <Text style={styles.cardTitle}>Datos del Servicio</Text>
+                        <View style={styles.dataRow}>
+                            <Text style={styles.dataLabel}>
+                                Fecha de Inicio
                             </Text>
-                            <View style={styles.notesCard}>
-                                <View style={styles.notesRow}>
-                                    <MaterialCommunityIcons
-                                        name="document-text-outline"
-                                        size={20}
-                                        color="#FFD43B"
-                                    />
-                                    <Text style={styles.notesText}>
-                                        {notes}
-                                    </Text>
-                                </View>
+                            <Text style={styles.dataValue}>{startDate}</Text>
+                        </View>
+                        <View style={styles.dataRow}>
+                            <Text style={styles.dataLabel}>Hora de Inicio</Text>
+                            <Text style={styles.dataValue}>{startTime}</Text>
+                        </View>
+                        <View style={styles.dataRow}>
+                            <Text style={styles.dataLabel}>
+                                Fecha de Finalización
+                            </Text>
+                            <Text style={styles.dataValue}>{endDate}</Text>
+                        </View>
+                        <View style={styles.dataRow}>
+                            <Text style={styles.dataLabel}>
+                                Hora de Finalización
+                            </Text>
+                            <Text style={styles.dataValue}>{endTime}</Text>
+                        </View>
+                    </View>
+
+                    {notes && notes.length > 0 && (
+                        <View style={[styles.card, { borderWidth: 1 }]}>
+                            <View style={styles.notesHeader}>
+                                <Feather
+                                    name="file-text"
+                                    size={14}
+                                    color="#FFD43B"
+                                />
+                                <Text style={styles.notesSectionTitle}>
+                                    Notas del cliente
+                                </Text>
                             </View>
-                        </>
+                            <Text style={styles.notesText}>{notes}</Text>
+                        </View>
                     )}
 
-                    {/* Products */}
                     <Text style={styles.sectionTitle}>
                         PRODUCTOS UTILIZADOS
                     </Text>
 
-                    <ProductRow brand="Mobil 1" name="Aceite Sintético 5W-30" />
-
-                    <ProductRow
-                        brand="Toyota Genuine"
-                        name="Filtro de Aceite"
-                    />
-
-                    <ProductRow brand="Bosch" name="Filtro de Aire" />
+                    {productsList.map((product) => (
+                        <View key={product.id} style={styles.productCard}>
+                            <View style={styles.productInfo}>
+                                <Text style={styles.productBrand}>
+                                    {product.brand}
+                                </Text>
+                                <Text style={styles.productName}>
+                                    {product.name}
+                                </Text>
+                            </View>
+                            <View style={styles.productQuantity}>
+                                <Text style={styles.quantityLabel}>Cant.</Text>
+                                <Text style={styles.quantityValue}>
+                                    {product.quantity}
+                                </Text>
+                            </View>
+                        </View>
+                    ))}
                 </ScrollView>
-                <BottomNav active="LastService" />
-            </SafeAreaView>
+            </View>
         </SafeAreaProvider>
     );
 };
-
-const TableRow = ({ label, value }) => (
-    <View style={styles.tableRow}>
-        <Text style={styles.tableLabel}>{label}</Text>
-        <Text style={styles.tableValue}>{value}</Text>
-    </View>
-);
-
-const ProductRow = ({ brand, name }) => (
-    <View style={styles.productRow}>
-        <View>
-            <Text style={styles.brandText}>{brand}</Text>
-            <Text style={styles.productName}>{name}</Text>
-        </View>
-    </View>
-);
 
 export default LastServiceScreen;
 
@@ -155,138 +199,93 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#0F1115",
         paddingHorizontal: 18,
-        paddingTop: 24,
     },
-
-    header: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 24,
-    },
-
-    headerTitle: {
-        color: "white",
-        fontWeight: "bold",
-        fontSize: 20,
-    },
-
     card: {
         backgroundColor: "#1A1D24",
-        borderRadius: 28,
-        padding: 28,
-        marginBottom: 28,
+        borderRadius: 20,
+        padding: 20,
+        marginBottom: 25,
     },
-
-    labelGold: {
-        color: "#FFD43B",
-        marginBottom: 6,
+    cardTitle: {
+        color: "#fff",
+        fontSize: 20,
+        fontWeight: "600",
+        marginBottom: 15,
     },
-
-    carTitleLarge: {
+    dataRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 12,
+    },
+    dataLabel: {
+        color: "#8B90A0",
+        fontSize: 14,
+    },
+    dataValue: {
         color: "white",
+        fontSize: 14,
         fontWeight: "600",
     },
-
-    subText: {
-        color: "#8B90A0",
-        marginTop: 8,
-    },
-
-    value: {
-        color: "white",
-        marginTop: 6,
-    },
-
     sectionTitle: {
         color: "#8B90A0",
+        fontSize: 14,
+        fontWeight: "600",
+        letterSpacing: 1,
         marginBottom: 16,
+        marginHorizontal: 18,
     },
-
-    serviceCard: {
-        backgroundColor: "#1A1D24",
-        borderRadius: 28,
-        padding: 28,
-        marginBottom: 28,
-    },
-
-    tableRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginBottom: 14,
-    },
-
-    tableLabel: {
-        color: "#8B90A0",
-    },
-
-    tableValue: {
-        color: "white",
-    },
-
-    productRow: {
+    notesHeader: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-between",
-        backgroundColor: "#1A1D24",
-        padding: 22,
-        borderRadius: 22,
-        marginBottom: 14,
+        marginBottom: 6,
+        gap: 6,
     },
-
-    brandText: {
+    notesSectionTitle: {
         color: "#FFD43B",
+        fontSize: 12,
         fontWeight: "600",
     },
-
-    productName: {
-        color: "#fff",
-        marginTop: 6,
-    },
-
-    notesCard: {
-        backgroundColor: "#1A1D24",
-        borderRadius: 24,
-        padding: 24,
-        marginBottom: 24,
-        borderTopWidth: 4,
-        borderTopColor: "#FFD43B",
-    },
-
-    notesRow: {
-        flexDirection: "row",
-        alignItems: "flex-start",
-        gap: 10,
-    },
-
     notesText: {
         color: "#888",
+        fontSize: 15,
         lineHeight: 22,
-        flex: 1,
     },
-
-    serviceItem: {
+    productCard: {
+        backgroundColor: "#1A1D24",
+        borderRadius: 20,
+        padding: 20,
+        marginBottom: 14,
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        paddingVertical: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: "#2A2E38",
     },
-
-    serviceItemLeft: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 16,
+    productInfo: {
         flex: 1,
     },
-
-    serviceItemText: {
-        color: "#fff",
-        flex: 1,
-    },
-
-    serviceStatus: {
+    productBrand: {
+        color: "#FFD43B",
+        fontSize: 14,
         fontWeight: "600",
+    },
+    productName: {
+        color: "#fff",
+        fontSize: 16,
+        marginTop: 4,
+    },
+    productQuantity: {
+        alignItems: "center",
+        backgroundColor: "#2A2D35",
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 10,
+    },
+    quantityLabel: {
+        color: "#8B90A0",
+        fontSize: 10,
+    },
+    quantityValue: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "700",
     },
 });
