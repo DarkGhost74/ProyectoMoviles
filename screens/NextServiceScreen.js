@@ -13,7 +13,7 @@ import { StatusBar } from "expo-status-bar";
 import BottomNav from "../components/BottomNav";
 
 const NextServiceScreen = ({ navigation, route }) => {
-    const { vehicle, plate, service, mileage, notes } = route.params || {};
+    const { vehicle, plate, service, mileage, notes, servicesList } = route.params || {};
 
     return (
         <SafeAreaProvider>
@@ -73,32 +73,51 @@ const NextServiceScreen = ({ navigation, route }) => {
                         <Text style={styles.value}>1HGBH456789012345</Text>
                     </View>
 
-                    {/* Service Details */}
+                    {/* Services Card */}
                     <Text style={styles.sectionTitle}>
-                        DETALLES DEL SERVICIO
+                        SERVICIOS
                     </Text>
 
                     <View style={styles.serviceCard}>
-                        <View style={styles.row}>
-                            <View style={styles.iconContainer}>
-                                <MaterialCommunityIcons
-                                    name="wrench"
-                                    size={24}
-                                    color="black"
-                                />
+                        {servicesList && servicesList.map((item, index) => {
+                            let iconName = 'clock';
+                            let iconColor = '#FFD43B';
+                            let statusText = 'En Proceso';
+                            
+                            if (item.status === 'Finalizado') {
+                                iconName = 'check-circle';
+                                iconColor = '#22C55E';
+                                statusText = 'Terminado';
+                            } else if (item.status === 'Pendiente') {
+                                iconName = 'x-circle';
+                                iconColor = '#EF4444';
+                                statusText = 'Pendiente';
+                            }
+                            
+                            return (
+                            <View key={item.id || index} style={styles.serviceItem}>
+                                <View style={styles.serviceItemLeft}>
+                                    <Feather 
+                                        name={iconName} 
+                                        size={32} 
+                                        color={iconColor} 
+                                    />
+                                    <Text style={styles.serviceItemText}>{item.title}</Text>
+                                </View>
+                                <Text style={[styles.serviceStatus, { color: iconColor }]}>{statusText}</Text>
                             </View>
+                            );
+                        })}
+                    </View>
 
-                            <View>
-                                <Text style={styles.serviceName}>
-                                    {service || "Servicio de mantenimiento"}
-                                </Text>
-                            </View>
-                        </View>
+                    {/* Vehicle Details Card */}
+                    <Text style={styles.sectionTitle}>
+                        DATOS DEL VEHÍCULO
+                    </Text>
 
-                        <View style={styles.separator} />
-
+                    <View style={styles.serviceCard}>
                         <DetailRow
-                            icon="speedometer"
+                            icon="car"
                             label="Kilometraje"
                             value={mileage || "50,000 km"}
                         />
@@ -124,7 +143,7 @@ const NextServiceScreen = ({ navigation, route }) => {
                                 <View style={styles.notesRow}>
                                     <Feather
                                         name="file-text"
-                                        size={16}
+                                        size={20}
                                         color="#FFD43B"
                                     />
                                     <Text style={styles.notesText}>
@@ -133,17 +152,16 @@ const NextServiceScreen = ({ navigation, route }) => {
                                 </View>
                             </View>
                         )}
-
-                        {/* Check-in Button */}
-                        <TouchableOpacity style={styles.checkInContainer}>
-                            <Feather
-                                name="arrow-right"
-                                size={20}
-                                color="#FFD43B"
-                            />
-                        </TouchableOpacity>
                     </View>
                 </ScrollView>
+                
+                {/* Floating Check-in Button */}
+                <View style={styles.fabWrapper}>
+                    <TouchableOpacity style={styles.fabButton}>
+                        <Feather name="arrow-right" size={24} color="black" />
+                    </TouchableOpacity>
+                </View>
+
                 <BottomNav active="NextService" />
             </SafeAreaView>
         </SafeAreaProvider>
@@ -153,7 +171,7 @@ const NextServiceScreen = ({ navigation, route }) => {
 const DetailRow = ({ icon, label, value }) => (
     <View style={styles.detailRow}>
         <View style={styles.row}>
-            <Feather name={icon} size={18} color="#9CA3AF" />
+            <MaterialCommunityIcons name={icon} size={22} color="#9CA3AF" />
             <Text style={styles.detailLabel}>{label}</Text>
         </View>
 
@@ -167,27 +185,28 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#0F1115",
-        padding: 18,
+        paddingHorizontal: 24,
+        paddingTop: 24,
     },
 
     header: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 20,
+        marginBottom: 24,
     },
 
     headerTitle: {
         color: "white",
-        fontSize: 18,
+        fontSize: 32,
         fontWeight: "bold",
     },
 
     card: {
         backgroundColor: "#1A1D24",
-        borderRadius: 20,
-        padding: 20,
-        marginBottom: 20,
+        borderRadius: 28,
+        padding: 28,
+        marginBottom: 28,
     },
 
     rowBetween: {
@@ -203,50 +222,51 @@ const styles = StyleSheet.create({
 
     carTitle: {
         color: "white",
-        fontSize: 16,
+        fontSize: 22,
         fontWeight: "600",
     },
 
     subText: {
         color: "#8B90A0",
-        marginTop: 4,
+        marginTop: 6,
+        fontSize: 16,
     },
 
     badge: {
         backgroundColor: "rgba(255,212,59,0.15)",
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 20,
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 24,
     },
 
     badgeText: {
         color: "#FFD43B",
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: "600",
     },
 
     label: {
         color: "#8B90A0",
-        fontSize: 12,
+        fontSize: 14,
     },
 
     value: {
         color: "white",
-        fontSize: 14,
-        marginTop: 3,
+        fontSize: 18,
+        marginTop: 4,
     },
 
     sectionTitle: {
         color: "#8B90A0",
-        fontSize: 13,
-        marginBottom: 10,
+        fontSize: 22,
+        marginBottom: 16,
     },
 
     serviceCard: {
         backgroundColor: "#1A1D24",
-        borderRadius: 20,
-        padding: 20,
-        marginBottom: 25,
+        borderRadius: 28,
+        padding: 28,
+        marginBottom: 28,
     },
 
     iconContainer: {
@@ -256,7 +276,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#FFD43B",
         justifyContent: "center",
         alignItems: "center",
-        marginRight: 10,
+        marginRight: 12,
     },
 
     serviceName: {
@@ -278,16 +298,18 @@ const styles = StyleSheet.create({
     detailRow: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginBottom: 10,
+        marginBottom: 14,
     },
 
     detailLabel: {
         color: "#8B90A0",
-        marginLeft: 6,
+        marginLeft: 8,
+        fontSize: 16,
     },
 
     detailValue: {
         color: "white",
+        fontSize: 16,
     },
 
     checkInContainer: {
@@ -319,37 +341,68 @@ const styles = StyleSheet.create({
         color: "#FFD43B",
         fontSize: 12,
         fontWeight: "600",
-        marginBottom: 8,
+        marginBottom: 6,
     },
 
     notesCard: {
         backgroundColor: "#1A1D24",
-        borderRadius: 15,
-        padding: 16,
+        borderRadius: 24,
+        padding: 24,
         flex: 1,
     },
 
     notesRow: {
         flexDirection: "row",
         alignItems: "flex-start",
-        gap: 8,
+        gap: 10,
     },
 
     notesText: {
         color: "#888",
-        fontSize: 13,
-        lineHeight: 18,
+        fontSize: 16,
+        lineHeight: 22,
         flex: 1,
     },
 
-    checkInContainer: {
+    fabButton: {
         width: 70,
         height: 70,
-        backgroundColor: "#1A1D24",
-        borderRadius: 15,
+        borderRadius: 35,
+        backgroundColor: "#FFD43B",
         justifyContent: "center",
         alignItems: "center",
-        borderWidth: 2,
-        borderColor: "#FFD43B",
+    },
+
+    fabWrapper: {
+        position: "absolute",
+        bottom: 100,
+        right: 28,
+    },
+
+    serviceItem: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#2A2E38",
+    },
+
+    serviceItemLeft: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 16,
+        flex: 1,
+    },
+
+    serviceItemText: {
+        color: "#fff",
+        fontSize: 20,
+        flex: 1,
+    },
+
+    serviceStatus: {
+        fontSize: 16,
+        fontWeight: "600",
     },
 });

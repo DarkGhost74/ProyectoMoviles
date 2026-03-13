@@ -7,12 +7,13 @@ import {
     TouchableOpacity,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import BottomNav from "../components/BottomNav";
 
 const LastServiceScreen = ({ navigation, route }) => {
-    const { vehicle, plate, service, mileage, notes } = route.params || {};
+    const { vehicle, plate, service, mileage, notes, servicesList } = route.params || {};
 
     return (
         <SafeAreaProvider>
@@ -70,16 +71,49 @@ const LastServiceScreen = ({ navigation, route }) => {
                         <Text style={styles.value}>Juan Pérez</Text>
                     </View>
 
-                    {/* Service Details */}
+                    {/* Services Card */}
                     <Text style={styles.sectionTitle}>
-                        DETALLES DEL SERVICIO
+                        SERVICIOS
                     </Text>
 
                     <View style={styles.serviceCard}>
-                        <TableRow
-                            label="Descripción"
-                            value={service || "Cambio de Aceite y Filtros"}
-                        />
+                        {servicesList && servicesList.map((item, index) => {
+                            let iconName = 'clock';
+                            let iconColor = '#FFD43B';
+                            let statusText = 'En Proceso';
+                            
+                            if (item.status === 'Finalizado') {
+                                iconName = 'check-circle';
+                                iconColor = '#22C55E';
+                                statusText = 'Terminado';
+                            } else if (item.status === 'Pendiente') {
+                                iconName = 'x-circle';
+                                iconColor = '#EF4444';
+                                statusText = 'Pendiente';
+                            }
+                            
+                            return (
+                            <View key={item.id || index} style={styles.serviceItem}>
+                                <View style={styles.serviceItemLeft}>
+                                    <Feather 
+                                        name={iconName} 
+                                        size={32} 
+                                        color={iconColor} 
+                                    />
+                                    <Text style={styles.serviceItemText}>{item.title}</Text>
+                                </View>
+                                <Text style={[styles.serviceStatus, { color: iconColor }]}>{statusText}</Text>
+                            </View>
+                            );
+                        })}
+                    </View>
+
+                    {/* Service Data Card */}
+                    <Text style={styles.sectionTitle}>
+                        DATOS DEL SERVICIO
+                    </Text>
+
+                    <View style={styles.serviceCard}>
                         <TableRow
                             label="Kilometraje"
                             value={mileage || "45,000 km"}
@@ -101,7 +135,7 @@ const LastServiceScreen = ({ navigation, route }) => {
                                 <View style={styles.notesRow}>
                                     <MaterialCommunityIcons
                                         name="document-text-outline"
-                                        size={16}
+                                        size={20}
                                         color="#FFD43B"
                                     />
                                     <Text style={styles.notesText}>
@@ -154,94 +188,81 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#0F1115",
-        padding: 18,
+        paddingHorizontal: 24,
+        paddingTop: 24,
     },
 
     header: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 20,
+        marginBottom: 24,
     },
 
     headerTitle: {
         color: "white",
-        fontSize: 18,
+        fontSize: 32,
         fontWeight: "bold",
     },
 
     card: {
         backgroundColor: "#1A1D24",
-        borderRadius: 20,
-        padding: 20,
-        marginBottom: 20,
+        borderRadius: 28,
+        padding: 28,
+        marginBottom: 28,
     },
 
     labelGold: {
         color: "#FFD43B",
-        fontSize: 12,
-        marginBottom: 4,
+        fontSize: 14,
+        marginBottom: 6,
     },
 
     carTitleLarge: {
         color: "white",
-        fontSize: 18,
+        fontSize: 24,
         fontWeight: "600",
     },
 
     subText: {
         color: "#8B90A0",
-        marginTop: 6,
+        marginTop: 8,
+        fontSize: 16,
     },
 
     value: {
         color: "white",
-        fontSize: 14,
-        marginTop: 4,
+        fontSize: 18,
+        marginTop: 6,
     },
 
     sectionTitle: {
         color: "#8B90A0",
-        fontSize: 13,
-        marginBottom: 10,
+        fontSize: 22,
+        marginBottom: 16,
     },
 
     serviceCard: {
         backgroundColor: "#1A1D24",
-        borderRadius: 20,
-        padding: 20,
-        marginBottom: 25,
+        borderRadius: 28,
+        padding: 28,
+        marginBottom: 28,
     },
 
     tableRow: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginBottom: 12,
+        marginBottom: 14,
     },
 
     tableLabel: {
         color: "#8B90A0",
+        fontSize: 16,
     },
 
     tableValue: {
         color: "white",
-    },
-
-    productHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginBottom: 10,
-    },
-
-    tableHeader: {
-        color: "#FFD43B",
-        fontSize: 12,
-        fontWeight: "600",
-        marginBottom: 8,
-    },
-
-    productHeader: {
-        marginBottom: 8,
+        fontSize: 16,
     },
 
     productRow: {
@@ -249,55 +270,28 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         backgroundColor: "#1A1D24",
-        padding: 14,
-        borderRadius: 12,
-        marginBottom: 10,
+        padding: 22,
+        borderRadius: 22,
+        marginBottom: 14,
     },
 
     brandText: {
         color: "#FFD43B",
-        fontSize: 12,
+        fontSize: 16,
         fontWeight: "600",
     },
 
     productName: {
         color: "#fff",
-        fontSize: 13,
-        marginTop: 2,
-    },
-
-    value: {
-        color: "#fff",
-        fontSize: 13,
-    },
-
-    skuText: {
-        color: "#FFD43B",
-        fontSize: 12,
-    },
-
-    brandText: {
-        color: "#8B90A0",
-        fontSize: 11,
-    },
-
-    qtyBadge: {
-        backgroundColor: "#FFD43B",
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 8,
-    },
-
-    qtyText: {
-        color: "black",
-        fontWeight: "600",
+        fontSize: 18,
+        marginTop: 6,
     },
 
     notesCard: {
         backgroundColor: "#1A1D24",
-        borderRadius: 15,
-        padding: 16,
-        marginBottom: 25,
+        borderRadius: 24,
+        padding: 24,
+        marginBottom: 24,
         borderTopWidth: 4,
         borderTopColor: "#FFD43B",
     },
@@ -305,13 +299,40 @@ const styles = StyleSheet.create({
     notesRow: {
         flexDirection: "row",
         alignItems: "flex-start",
-        gap: 8,
+        gap: 10,
     },
 
     notesText: {
         color: "#888",
-        fontSize: 13,
-        lineHeight: 18,
+        fontSize: 16,
+        lineHeight: 22,
         flex: 1,
+    },
+
+    serviceItem: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#2A2E38",
+    },
+
+    serviceItemLeft: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 16,
+        flex: 1,
+    },
+
+    serviceItemText: {
+        color: "#fff",
+        fontSize: 20,
+        flex: 1,
+    },
+
+    serviceStatus: {
+        fontSize: 16,
+        fontWeight: "600",
     },
 });

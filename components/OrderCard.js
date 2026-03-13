@@ -126,6 +126,7 @@ const OrderCard = ({ id, type, vehicleYear, vehicleBrand, vehicleModel, vehicleP
                                             vehicle: `${vehicleYear} ${vehicleBrand} ${vehicleModel}`,
                                             plate: vehiclePlate,
                                             service: serviceInfo,
+                                            servicesList: services,
                                             mileage: mileage,
                                             notes: notes || ''
                                         });
@@ -136,6 +137,7 @@ const OrderCard = ({ id, type, vehicleYear, vehicleBrand, vehicleModel, vehicleP
                                             vehicle: `${vehicleYear} ${vehicleBrand} ${vehicleModel}`,
                                             plate: vehiclePlate,
                                             service: serviceInfo,
+                                            servicesList: services,
                                             mileage: mileage,
                                             notes: notes || ''
                                         });
@@ -146,6 +148,7 @@ const OrderCard = ({ id, type, vehicleYear, vehicleBrand, vehicleModel, vehicleP
                                             vehicle: `${vehicleYear} ${vehicleBrand} ${vehicleModel}`,
                                             plate: vehiclePlate,
                                             service: serviceInfo,
+                                            servicesList: services,
                                             mileage: mileage,
                                             notes: notes || ''
                                         });
