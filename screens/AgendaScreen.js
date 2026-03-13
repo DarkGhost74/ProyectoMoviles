@@ -13,6 +13,7 @@ import { StatusBar } from "expo-status-bar";
 import BottomNav from "../components/BottomNav";
 import OrderCard from "../components/OrderCard";
 import { useNavigation } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 const months = [
   "Enero","Febrero","Marzo","Abril","Mayo","Junio",
   "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
@@ -53,6 +54,7 @@ const mockOrders = {
 
 export default function AgendaScreen() {
 const navigation = useNavigation();
+const insets = useSafeAreaInsets();
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedDay, setSelectedDay] = useState(new Date().getDate());
@@ -117,11 +119,15 @@ const navigation = useNavigation();
   return (
     <>
       <StatusBar style="light" />
-      <SafeAreaView style={styles.container} edges={["top"]}>
+      <SafeAreaView
+  style={[styles.container, { paddingBottom: insets.bottom }]}
+  edges={["top","bottom"]}
+>
 
         <ScrollView
+         style={{ flex: 1 }}
           contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
+          shwsVerticalScrollIndicator={false}
         >
 
           <View style={styles.headerRow}>
