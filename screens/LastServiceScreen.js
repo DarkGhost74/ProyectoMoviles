@@ -14,7 +14,7 @@ import BottomNav from "../components/BottomNav";
 import Service from "../components/Service";
 
 const LastServiceScreen = ({ navigation, route }) => {
-    const { vehicle, plate, vehicleColor, service, mileage, notes, servicesList } = route.params || {};
+    const { vehicle, plate, vehicleColor, vehicleVIN, service, mileage, notes, servicesList } = route.params || {};
 
     return (
         <SafeAreaProvider>
@@ -64,7 +64,7 @@ const LastServiceScreen = ({ navigation, route }) => {
                         <Text style={[styles.labelGold, { marginTop: 20 }]}>
                             VIN / NIV
                         </Text>
-                        <Text style={styles.value}>1B3HB48M2X8D12345</Text>
+                        <Text style={styles.value}>{vehicleVIN || '1B3HB48M2X8D12345'}</Text>
 
                         <Text style={[styles.labelGold, { marginTop: 20 }]}>
                             PROPIETARIO

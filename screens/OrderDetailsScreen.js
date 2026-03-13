@@ -92,7 +92,7 @@ const Item = ({ id, title, status, onToggle }) => {
 
 const OrderDetailsScreen= ({navigation, route}) => {
     // No Modificar: orderId
-    const { orderId, vehicle, plate, vehicleColor, service, mileage, notes } = route.params || {};
+    const { orderId, vehicle, plate, vehicleColor, vehicleVIN, service, mileage, notes } = route.params || {};
     const insets = useSafeAreaInsets();
 
     // No Modificar: Lista dinamica
@@ -191,11 +191,11 @@ const OrderDetailsScreen= ({navigation, route}) => {
                             </View>
                             <View style={{ flex: 1 }}>
                                 <Text style={styles.label}>VIN/NIV</Text>
-                                <Text style={styles.value}>1HGBH456789012345</Text> 
+                                <Text style={styles.value}>{vehicleVIN || 'no hay NIV disponible'}</Text> 
                             </View>                            
                         </View>
                     </View>
-                    <View 
+                    <View
                         style={[
                             styles.card,
                         ]}
