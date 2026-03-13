@@ -5,7 +5,6 @@ import {
     StyleSheet,
     ScrollView,
     TouchableOpacity,
-    Image,
     Pressable,
     FlatList,
 } from "react-native";
@@ -14,154 +13,164 @@ import {
     SafeAreaView,
     useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
+import { MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
-import BottomNav from "../components/BottomNav";
 import { useNavigation } from "@react-navigation/native"; //NAVEGACION
 
 // NO Modificar: Se tomara como punto de partida para implementar la logica de cambio de estado
 const INITIAL_DATA = [
     {
-        id: '1',
-        title: 'Alineación y balanceo',
-        status: 'Finalizado'
+        id: "1",
+        title: "Alineación y balanceo",
+        status: "Finalizado",
     },
     {
-        id: '2',
-        title: 'Cambio filtro aire acondicionado',
-        status: 'Pendiente'
+        id: "2",
+        title: "Cambio filtro aire acondicionado",
+        status: "Pendiente",
     },
     {
-        id: '3',
-        title: 'Lavado de motor',
-        status: 'En Progreso' // No Modificar -> Cambio: "En Proceso " -> "En progreso"
+        id: "3",
+        title: "Lavado de motor",
+        status: "En Progreso", // No Modificar -> Cambio: "En Proceso " -> "En progreso"
     },
     {
-        id: '4',
-        title: 'Cambio de aceite',
-        status: 'En Progreso' // No Modificar -> Cambio: "En Proceso " -> "En progreso"
+        id: "4",
+        title: "Cambio de aceite",
+        status: "En Progreso", // No Modificar -> Cambio: "En Proceso " -> "En progreso"
     },
     {
-        id: '5',
-        title: 'Cambio de filtro de aceite',
-        status: 'En Progreso' // No Modificar -> Cambio: "En Proceso " -> "En progreso"
+        id: "5",
+        title: "Cambio de filtro de aceite",
+        status: "En Progreso", // No Modificar -> Cambio: "En Proceso " -> "En progreso"
     },
     {
-        id: '6',
-        title: 'Inflado de llantas con nitrogeno',
-        status: 'Pendiente'
+        id: "6",
+        title: "Inflado de llantas con nitrogeno",
+        status: "Pendiente",
     },
-]
+];
 
 // No modificar: id & onToggle()
 const Item = ({ id, title, status, onToggle }) => {
-  const renderIcon = () => {
-    switch (status) {
-      case "Finalizado":
-        return <Feather name="check-circle" size={18} color="#22C55E" />;
-      case "En Progreso": // No Modificar -> Cambio: "En Proceso " -> "En progreso"
-        return <Feather name="clock" size={18} color="#FFD43B" />;
-      case "Pendiente":
-        return <Feather name="x-circle" size={18} color="#EF4444" />;
-      default:
-        return null;
-    }
-  };
+    const renderIcon = () => {
+        switch (status) {
+            case "Finalizado":
+                return (
+                    <Feather name="check-circle" size={18} color="#22C55E" />
+                );
+            case "En Progreso": // No Modificar -> Cambio: "En Proceso " -> "En progreso"
+                return <Feather name="clock" size={18} color="#FFD43B" />;
+            case "Pendiente":
+                return <Feather name="x-circle" size={18} color="#EF4444" />;
+            default:
+                return null;
+        }
+    };
 
-  return (
-    // No modificar: View -> TouchableOpacity
-    <TouchableOpacity
-        activeOpacity={0.7}
-        onPress={() => onToggle(id)}
-        style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginTop: 15,
-            paddingVertical: 5
-    }}>
-        <Text style={{ color: "#fff", fontWeight: "bold" }}>
-            {title}
-        </Text>
+    return (
+        // No modificar: View -> TouchableOpacity
+        <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => onToggle(id)}
+            style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginTop: 15,
+                paddingVertical: 5,
+            }}
+        >
+            <Text style={{ color: "#fff", fontWeight: "bold" }}>{title}</Text>
 
-      {renderIcon()}
-    </TouchableOpacity>
-  );
+            {renderIcon()}
+        </TouchableOpacity>
+    );
 };
 
-
-const OrderDetailsScreen= ({navigation, route}) => {
+const OrderDetailsScreen = ({ navigation, route }) => {
     // No Modificar: orderId
-    const { orderId, vehicle, plate, vehicleColor, vehicleVIN, service, mileage, notes } = route.params || {};
+    const {
+        orderId,
+        vehicle,
+        plate,
+        vehicleColor,
+        vehicleVIN,
+        service,
+        mileage,
+        notes,
+    } = route.params || {};
     const insets = useSafeAreaInsets();
 
     // No Modificar: Lista dinamica
     const [orderServices, setOrderServices] = useState(INITIAL_DATA);
     // Logica de cambio
     const toggleServiceStatus = (serviceId) => {
-        setOrderServices(prevServices => 
-            prevServices.map(item => {
+        setOrderServices((prevServices) =>
+            prevServices.map((item) => {
                 if (item.id === serviceId) {
                     let nextStatus;
-                    if (item.status === 'Pendiente') nextStatus = "En Progreso";
-                    else if (item.status === 'En Progreso') nextStatus = "Finalizado";
-                    else nextStatus = 'Pendiente'; 
+                    if (item.status === "Pendiente") nextStatus = "En Progreso";
+                    else if (item.status === "En Progreso")
+                        nextStatus = "Finalizado";
+                    else nextStatus = "Pendiente";
 
                     return { ...item, status: nextStatus };
                 }
-                return item; 
-            })
+                return item;
+            }),
         );
     };
 
-    
     return (
         <SafeAreaProvider>
             <StatusBar style="light" />
-            <SafeAreaView
-                style={[styles.container, { }]}
-                edges={["top", ]}
-            >
-
-
-                <ScrollView>
-                    <View style={{
-                        flexDirection:"row",
-                        alignItems: "center",
-                        paddingHorizontal: 15,
-                        paddingVertical: 10,
-                        backgroundColor: "#0F1115",
-                    }}>
-                        <Pressable 
+            <View style={styles.container}>
+                <View
+                    style={{ height: insets.top, backgroundColor: "#0F1115" }}
+                />
+                <ScrollView
+                    contentContainerStyle={{
+                        paddingBottom: insets.bottom + 20,
+                    }}
+                >
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            paddingHorizontal: 15,
+                            paddingVertical: 10,
+                            backgroundColor: "#0F1115",
+                        }}
+                    >
+                        <Pressable
                             onPress={() => navigation.navigate("Orders")}
                             hitSlop={12}
-                            style={{ padding: 1}}
-                            >
+                            style={{ padding: 1 }}
+                        >
                             <MaterialCommunityIcons
                                 name="arrow-left"
                                 size={24}
-                                color={"#ffff"}                       
-                            />           
+                                color={"#ffff"}
+                            />
                         </Pressable>
                         <Text
-                        style={{
-                            color: "#ffff",
-                            fontSize: 24,
-                            fontWeight: "bold",
-                            marginLeft: 20,
-
-                        }}                              
+                            style={{
+                                color: "#ffff",
+                                fontSize: 24,
+                                fontWeight: "bold",
+                                marginLeft: 20,
+                            }}
                         >
                             {/* No modificar: Orden Dinamica */}
-                            Orden #{orderId || '---'}
-
-                        </Text>                    
+                            Orden #{orderId || "---"}
+                        </Text>
                     </View>
                     <View
                         style={[
                             styles.card,
-                            { borderWidth: 1},
-                            { marginTop: 10}
+                            { borderWidth: 1 },
+                            { marginTop: 10 },
                         ]}
                     >
                         <View style={styles.rowBetween}>
@@ -174,7 +183,9 @@ const OrderDetailsScreen= ({navigation, route}) => {
                         <View style={[styles.row, { marginTop: 20 }]}>
                             <View style={{ flex: 1 }}>
                                 <Text style={styles.label}>COLOR</Text>
-                                <Text style={styles.value}>{vehicleColor || "Blanco Perlado"}</Text>
+                                <Text style={styles.value}>
+                                    {vehicleColor || "Blanco Perlado"}
+                                </Text>
                             </View>
 
                             <View style={{ flex: 1 }}>
@@ -184,87 +195,92 @@ const OrderDetailsScreen= ({navigation, route}) => {
                                 </Text>
                             </View>
                         </View>
-                        <View style={[styles.row, { marginTop: 20}]}>
+                        <View style={[styles.row, { marginTop: 20 }]}>
                             <View style={{ flex: 1 }}>
                                 <Text style={styles.label}>KILOMETRAJE</Text>
                                 <Text style={styles.value}>{mileage}</Text>
                             </View>
                             <View style={{ flex: 1 }}>
                                 <Text style={styles.label}>VIN/NIV</Text>
-                                <Text style={styles.value}>{vehicleVIN || 'no hay NIV disponible'}</Text> 
-                            </View>                            
+                                <Text style={styles.value}>
+                                    {vehicleVIN || "no hay NIV disponible"}
+                                </Text>
+                            </View>
                         </View>
                     </View>
-                    <View
-                        style={[
-                            styles.card,
-                        ]}
-                    >
-                        <Text style={styles.carTitle}>Servicios</Text>   
-                            <FlatList
-                                scrollEnabled={false}
-                                data={orderServices} // No Modificar: Cambio de variable: DATA -> orderServices
-                                keyExtractor={(item) => item.id}
-                                renderItem={({ item }) => (
-                                    <Item // No modificar id & onToggle
-                                        id={item.id}
-                                        title={item.title} 
-                                        status={item.status} 
-                                        onToggle={toggleServiceStatus}
-                                    />
+                    <View style={[styles.card]}>
+                        <Text style={styles.carTitle}>Servicios</Text>
+                        <FlatList
+                            scrollEnabled={false}
+                            data={orderServices} // No Modificar: Cambio de variable: DATA -> orderServices
+                            keyExtractor={(item) => item.id}
+                            renderItem={({ item }) => (
+                                <Item // No modificar id & onToggle
+                                    id={item.id}
+                                    title={item.title}
+                                    status={item.status}
+                                    onToggle={toggleServiceStatus}
+                                />
                             )}
-                        />        
+                        />
                     </View>
-                    <View style={[
-                        styles.card,
-                        {borderWidth: 1}
-                        ]}>
-                        <Text style={styles.notesSectionTitle}>NOTAS DEL CLIENTE</Text>
-                        <Text style={[
-                            { fontSize: 15 },
-                            { marginTop: 1},
-                            { color: "#969494ff"}                          
-
-                        ]}>{notes}</Text>
-
+                    <View style={[styles.card, { borderWidth: 1 }]}>
+                        <Text style={styles.notesSectionTitle}>
+                            NOTAS DEL CLIENTE
+                        </Text>
+                        <Text
+                            style={[
+                                { fontSize: 15 },
+                                { marginTop: 1 },
+                                { color: "#969494ff" },
+                            ]}
+                        >
+                            {notes}
+                        </Text>
                     </View>
-                    <View style={{
+                    <View
+                        style={{
                             flexDirection: "row",
                             gap: 15,
-                            marginTop: -15
-                         }}>
+                            marginTop: -15,
+                        }}
+                    >
                         {/* No Modificar: Preparación para el envio del orderId a las pantallas: Agregar ../.. */}
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             style={[styles.productButton, styles.half]}
-                            onPress={() => navigation.navigate("AddProduct", { orderId: orderId })}
-                            >
-                            <Text style={styles.secondaryButtonText}>Agregar Producto</Text>
+                            onPress={() =>
+                                navigation.navigate("AddProduct", {
+                                    orderId: orderId,
+                                })
+                            }
+                        >
+                            <Text style={styles.secondaryButtonText}>
+                                Agregar Producto
+                            </Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity 
-                            style={[styles.serviceButton, styles.half]} 
-                            onPress={() => navigation.navigate("AddService", { orderId: orderId })}
-                            >
-                            <Text style={styles.secondaryButtonText}>Agregar Servicio</Text>
+                        <TouchableOpacity
+                            style={[styles.serviceButton, styles.half]}
+                            onPress={() =>
+                                navigation.navigate("AddService", {
+                                    orderId: orderId,
+                                })
+                            }
+                        >
+                            <Text style={styles.secondaryButtonText}>
+                                Agregar Servicio
+                            </Text>
                         </TouchableOpacity>
                     </View>
 
                     <TouchableOpacity style={[styles.primaryButton]}>
-                            <Text style={styles.primaryButtonText}>
-                                Finalizar
-                            </Text>
+                        <Text style={styles.primaryButtonText}>Finalizar</Text>
                     </TouchableOpacity>
-
-                    
                 </ScrollView>
-
-
-            </SafeAreaView>
-
+            </View>
         </SafeAreaProvider>
-
-  );
-}
+    );
+};
 
 export default OrderDetailsScreen;
 
@@ -451,7 +467,7 @@ const styles = StyleSheet.create({
         elevation: 8,
     },
     half: {
-        flex: 1
+        flex: 1,
     },
     productButton: {
         backgroundColor: "#111827",
@@ -476,5 +492,5 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "center",
         gap: 8,
-    }
+    },
 });
