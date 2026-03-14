@@ -7,7 +7,7 @@ import {
     ActivityIndicator,
     TouchableOpacity,
 } from "react-native";
-import { Octicons } from "@expo/vector-icons";
+import { Octicons, Feather } from "@expo/vector-icons";
 import {
     SafeAreaProvider,
     SafeAreaView,
@@ -16,6 +16,12 @@ import {
 import { StatusBar } from "expo-status-bar";
 import BottomNav from "../components/BottomNav";
 import OrderCard from "../components/OrderCard";
+import OrderService from "../services/OrderService";
+
+import { getAuth } from "firebase/auth";
+import { app } from "../firebaseConfig";
+
+const auth = getAuth(app);
 
 // POR NADA DEL MUNDO TOCAR ESTOS IMPORTS!!
 import OrderService from "../services/OrderService";
@@ -83,6 +89,7 @@ export default function OrdersScreen({ navigation }) {
     const [expandedId, setExpandedId] = useState(null);
     const insets = useSafeAreaInsets();
     
+<<<<<<< HEAD
     // Estados para la API RESTful
     const [activeOrder, setActiveOrder] = useState(null);
     const [upcomingOrders, setUpcomingOrders] = useState([]);
@@ -102,13 +109,39 @@ export default function OrdersScreen({ navigation }) {
 
         } catch (err) {
             console.error("Error al cargar la agenda:", err);
+=======
+    const [activeOrder, setActiveOrder] = useState(null);
+    const [upcomingOrders, setUpcomingOrders] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const fetchOrders = async (uid) => {
+        if (!uid) return;
+
+        try {
+            setIsLoading(true);
+            setError(null);
+
+            const active = await OrderService.getActiveOrder(uid);
+            const upcoming = await OrderService.getUpcomingOrders(uid);
+
+            setActiveOrder(active);
+            setUpcomingOrders(upcoming);
+
+        } catch (err) {
+            console.error("Error al cargar órdenes:", err);
+            setError("No se pudieron cargar las órdenes. Verifica tu conexión e intenta de nuevo.");
+>>>>>>> 8b76e079e2222ab3f97b2decc8cb396b1b42dd03
         } finally {
             setIsLoading(false);
         }
     };
 
     useEffect(() => {
+<<<<<<< HEAD
         // Escuchamos a Firebase para obtener el UID
+=======
+>>>>>>> 8b76e079e2222ab3f97b2decc8cb396b1b42dd03
         const unsubscribeAuth = auth.onAuthStateChanged((user) => {
             if (user) {
                 fetchOrders(user.uid);
@@ -117,7 +150,10 @@ export default function OrdersScreen({ navigation }) {
             }
         });
 
+<<<<<<< HEAD
         // Recargamos si regresamos de otra pantalla
+=======
+>>>>>>> 8b76e079e2222ab3f97b2decc8cb396b1b42dd03
         const unsubscribeFocus = navigation.addListener('focus', () => {
             const currentUser = auth.currentUser;
             if (currentUser) {
@@ -131,19 +167,79 @@ export default function OrdersScreen({ navigation }) {
         };
     }, [navigation]);
 
+<<<<<<< HEAD
     // Renderizamos un Loading igual al de HomeScreen
+=======
+    const getDateLabel = (timeString) => {
+        if (!timeString) return 'SIN FECHA';
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        const dateMatch = timeString.split(',')[0];
+        if (!dateMatch) return 'SIN FECHA';
+        
+        const [day, month, year] = dateMatch.split('/').map(Number);
+        const orderDate = new Date(year, month - 1, day);
+        
+        const todayStr = today.toLocaleDateString('es-MX');
+        const tomorrowStr = tomorrow.toLocaleDateString('es-MX');
+        
+        if (dateMatch === todayStr) return 'HOY';
+        if (dateMatch === tomorrowStr) return 'MAÑANA';
+        return dateMatch;
+    };
+
+    const groupedOrders = upcomingOrders.reduce((groups, order) => {
+        const label = getDateLabel(order.time);
+        if (!groups[label]) {
+            groups[label] = [];
+        }
+        groups[label].push(order);
+        return groups;
+    }, {});
+
+    const sortedDayLabels = Object.keys(groupedOrders).sort((a, b) => {
+        if (a === 'HOY') return -1;
+        if (b === 'HOY') return 1;
+        if (a === 'MAÑANA') return -1;
+        if (b === 'MAÑANA') return 1;
+        return a.localeCompare(b);
+    });
+
+>>>>>>> 8b76e079e2222ab3f97b2decc8cb396b1b42dd03
     if (isLoading && !activeOrder && upcomingOrders.length === 0) {
         return (
             <SafeAreaProvider>
                 <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
                     <ActivityIndicator size="large" color="#FFD43B" />
+<<<<<<< HEAD
                     <Text style={{ color: "#888", marginTop: 15 }}>Cargando agenda...</Text>
+=======
+                    <Text style={{ color: "#888", marginTop: 15 }}>Sincronizando con el taller...</Text>
+>>>>>>> 8b76e079e2222ab3f97b2decc8cb396b1b42dd03
                 </SafeAreaView>
             </SafeAreaProvider>
         );
     }
 
+<<<<<<< HEAD
     const groupedOrders = groupOrdersByDay(upcomingOrders);
+=======
+    if (error) {
+        return (
+            <SafeAreaProvider>
+                <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                    <Feather name="alert-triangle" size={40} color="#FF4D4D" />
+                    <Text style={{ color: "#fff", marginTop: 15, textAlign: 'center', paddingHorizontal: 20 }}>{error}</Text>
+                    <TouchableOpacity onPress={() => fetchOrders(auth?.currentUser?.uid)} style={[styles.detailsButton, { marginTop: 20 }]}>
+                        <Text style={styles.detailsButtonText}>Reintentar</Text>
+                    </TouchableOpacity>
+                </SafeAreaView>
+            </SafeAreaProvider>
+        );
+    }
+>>>>>>> 8b76e079e2222ab3f97b2decc8cb396b1b42dd03
 
     return (
         <SafeAreaProvider>
@@ -182,18 +278,28 @@ export default function OrdersScreen({ navigation }) {
                             Ordenes actuales
                         </Text>
                     </View>
+<<<<<<< HEAD
                     
                     {/* Renderización Dinámica de Orden Activa */}
                     {activeOrder ? (
                         <OrderCard
                             id={activeOrder.id} 
+=======
+                    {activeOrder ? (
+                        <OrderCard
+                            id={activeOrder.id}
+>>>>>>> 8b76e079e2222ab3f97b2decc8cb396b1b42dd03
                             type="active"
                             vehicleYear={activeOrder.vehicleYear}
                             vehicleBrand={activeOrder.vehicleBrand}
                             vehicleModel={activeOrder.vehicleModel}
                             vehiclePlate={activeOrder.vehiclePlate}
                             vehicleColor={activeOrder.vehicleColor}
+<<<<<<< HEAD
                             ownerName={activeOrder.ownerName} 
+=======
+                            ownerName={activeOrder.ownerName}
+>>>>>>> 8b76e079e2222ab3f97b2decc8cb396b1b42dd03
                             services={activeOrder.services}
                             notes={activeOrder.notes}
                             time={activeOrder.since}
@@ -208,6 +314,7 @@ export default function OrdersScreen({ navigation }) {
                         </View>
                     )}
 
+<<<<<<< HEAD
                     {upcomingOrders.length === 0 && (
                         <View style={styles.emptyState}>
                             <Text style={styles.emptyText}>No tienes órdenes agendadas próximamente</Text>
@@ -240,6 +347,45 @@ export default function OrdersScreen({ navigation }) {
                             ))}
                         </View>
                     ))}
+=======
+                    <View style={styles.sectionRow}>
+                        <Text style={styles.sectionTitle}>
+                            Órdenes próximas
+                        </Text>
+                    </View>
+
+                    {upcomingOrders.length > 0 ? (
+                        sortedDayLabels.map((dayLabel) => (
+                            <View key={dayLabel}>
+                                <Text style={styles.sectionLabel}>{dayLabel}</Text>
+                                {groupedOrders[dayLabel].map((order) => (
+                                    <OrderCard
+                                        key={order.id}
+                                        id={order.id}
+                                        type="upcoming"
+                                        vehicleYear={order.vehicleYear}
+                                        vehicleBrand={order.vehicleBrand}
+                                        vehicleModel={order.vehicleModel}
+                                        vehiclePlate={order.vehiclePlate}
+                                        vehicleColor={order.vehicleColor}
+                                        ownerName={order.ownerName}
+                                        services={order.services}
+                                        notes={order.notes}
+                                        time={order.time}
+                                        mileage={order.vehicleMileage}
+                                        navigation={navigation}
+                                        expandedId={expandedId}
+                                        setExpandedId={setExpandedId}
+                                    />
+                                ))}
+                            </View>
+                        ))
+                    ) : (
+                        <View style={styles.emptyState}>
+                            <Text style={styles.emptyText}>No hay órdenes próximas</Text>
+                        </View>
+                    )}
+>>>>>>> 8b76e079e2222ab3f97b2decc8cb396b1b42dd03
 
                     <View style={{ height: 120 }} />
                 </ScrollView>
@@ -249,12 +395,28 @@ export default function OrdersScreen({ navigation }) {
     );
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 8b76e079e2222ab3f97b2decc8cb396b1b42dd03
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#0F1115",
         paddingHorizontal: 18,
+    },
+    sectionRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginTop: 20,
+        marginBottom: 10,
+    },
+    sectionTitle: {
+        color: "#fff",
+        fontSize: 18,
+        fontWeight: "600",
+        marginBottom: 12,
     },
     sectionLabel: {
         color: "#8B90A0",
@@ -274,5 +436,20 @@ const styles = StyleSheet.create({
     emptyText: {
         color: "#777",
         fontSize: 14,
+    },
+    detailsButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: "#FFD43B",
+    },
+    detailsButtonText: {
+        color: "#FFD43B",
+        fontSize: 13,
+        fontWeight: "600",
     },
 });
