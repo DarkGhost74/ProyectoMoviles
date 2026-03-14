@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     View,
     Text,
     StyleSheet,
     ScrollView,
+    ActivityIndicator,
+    TouchableOpacity,
 } from "react-native";
-import { Octicons } from "@expo/vector-icons";
+import { Octicons, Feather } from "@expo/vector-icons";
 import {
     SafeAreaProvider,
     SafeAreaView,
@@ -14,11 +16,127 @@ import {
 import { StatusBar } from "expo-status-bar";
 import BottomNav from "../components/BottomNav";
 import OrderCard from "../components/OrderCard";
+import OrderService from "../services/OrderService";
+
+import { getAuth } from "firebase/auth";
+import { app } from "../firebaseConfig";
+
+const auth = getAuth(app);
 
 export default function OrdersScreen({ navigation }) {
-    const [expandedId, setExpandedId] = useState(ACTIVE_ORDER ? `active-${ACTIVE_ORDER.vehiclePlate}` : null);
+    const [expandedId, setExpandedId] = useState(null);
     const insets = useSafeAreaInsets();
-    const groupedOrders = groupOrdersByDay(UPCOMING_ORDERS);
+    
+    const [activeOrder, setActiveOrder] = useState(null);
+    const [upcomingOrders, setUpcomingOrders] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const fetchOrders = async (uid) => {
+        if (!uid) return;
+
+        try {
+            setIsLoading(true);
+            setError(null);
+
+            const active = await OrderService.getActiveOrder(uid);
+            const upcoming = await OrderService.getUpcomingOrders(uid);
+
+            setActiveOrder(active);
+            setUpcomingOrders(upcoming);
+
+        } catch (err) {
+            console.error("Error al cargar órdenes:", err);
+            setError("No se pudieron cargar las órdenes. Verifica tu conexión e intenta de nuevo.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+            if (user) {
+                fetchOrders(user.uid);
+            } else {
+                setIsLoading(false);
+            }
+        });
+
+        const unsubscribeFocus = navigation.addListener('focus', () => {
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+                fetchOrders(currentUser.uid);
+            }
+        });
+
+        return () => {
+            unsubscribeAuth();
+            unsubscribeFocus();
+        };
+    }, [navigation]);
+
+    const getDateLabel = (timeString) => {
+        if (!timeString) return 'SIN FECHA';
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        const dateMatch = timeString.split(',')[0];
+        if (!dateMatch) return 'SIN FECHA';
+        
+        const [day, month, year] = dateMatch.split('/').map(Number);
+        const orderDate = new Date(year, month - 1, day);
+        
+        const todayStr = today.toLocaleDateString('es-MX');
+        const tomorrowStr = tomorrow.toLocaleDateString('es-MX');
+        
+        if (dateMatch === todayStr) return 'HOY';
+        if (dateMatch === tomorrowStr) return 'MAÑANA';
+        return dateMatch;
+    };
+
+    const groupedOrders = upcomingOrders.reduce((groups, order) => {
+        const label = getDateLabel(order.time);
+        if (!groups[label]) {
+            groups[label] = [];
+        }
+        groups[label].push(order);
+        return groups;
+    }, {});
+
+    const sortedDayLabels = Object.keys(groupedOrders).sort((a, b) => {
+        if (a === 'HOY') return -1;
+        if (b === 'HOY') return 1;
+        if (a === 'MAÑANA') return -1;
+        if (b === 'MAÑANA') return 1;
+        return a.localeCompare(b);
+    });
+
+    if (isLoading && !activeOrder && upcomingOrders.length === 0) {
+        return (
+            <SafeAreaProvider>
+                <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                    <ActivityIndicator size="large" color="#FFD43B" />
+                    <Text style={{ color: "#888", marginTop: 15 }}>Sincronizando con el taller...</Text>
+                </SafeAreaView>
+            </SafeAreaProvider>
+        );
+    }
+
+    if (error) {
+        return (
+            <SafeAreaProvider>
+                <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                    <Feather name="alert-triangle" size={40} color="#FF4D4D" />
+                    <Text style={{ color: "#fff", marginTop: 15, textAlign: 'center', paddingHorizontal: 20 }}>{error}</Text>
+                    <TouchableOpacity onPress={() => fetchOrders(auth?.currentUser?.uid)} style={[styles.detailsButton, { marginTop: 20 }]}>
+                        <Text style={styles.detailsButtonText}>Reintentar</Text>
+                    </TouchableOpacity>
+                </SafeAreaView>
+            </SafeAreaProvider>
+        );
+    }
+
     return (
         <SafeAreaProvider>
             <StatusBar style="light" />
@@ -56,20 +174,20 @@ export default function OrdersScreen({ navigation }) {
                             Ordenes actuales
                         </Text>
                     </View>
-                    {ACTIVE_ORDER ? (
+                    {activeOrder ? (
                         <OrderCard
-                            id={ACTIVE_ORDER.id} // id -> No Modificar
+                            id={activeOrder.id}
                             type="active"
-                            vehicleYear={ACTIVE_ORDER.vehicleYear}
-                            vehicleBrand={ACTIVE_ORDER.vehicleBrand}
-                            vehicleModel={ACTIVE_ORDER.vehicleModel}
-                            vehiclePlate={ACTIVE_ORDER.vehiclePlate}
-                            vehicleColor={ACTIVE_ORDER.vehicleColor}
-                            ownerName={ACTIVE_ORDER.ownerName} // <-- Agregado, vehicleVIN eliminado
-                            services={ACTIVE_ORDER.services}
-                            notes={ACTIVE_ORDER.notes}
-                            time={ACTIVE_ORDER.time}
-                            mileage={ACTIVE_ORDER.vehicleMileage}
+                            vehicleYear={activeOrder.vehicleYear}
+                            vehicleBrand={activeOrder.vehicleBrand}
+                            vehicleModel={activeOrder.vehicleModel}
+                            vehiclePlate={activeOrder.vehiclePlate}
+                            vehicleColor={activeOrder.vehicleColor}
+                            ownerName={activeOrder.ownerName}
+                            services={activeOrder.services}
+                            notes={activeOrder.notes}
+                            time={activeOrder.since}
+                            mileage={activeOrder.vehicleMileage}
                             navigation={navigation}
                             expandedId={expandedId}
                             setExpandedId={setExpandedId}
@@ -80,28 +198,27 @@ export default function OrdersScreen({ navigation }) {
                         </View>
                     )}
 
-                    {UPCOMING_ORDERS.length === 0 && (
-                        <View style={styles.emptyState}>
-                            <Text style={styles.emptyText}>No hay órdenes próximas</Text>
-                        </View>
-                    )}
+                    <View style={styles.sectionRow}>
+                        <Text style={styles.sectionTitle}>
+                            Órdenes próximas
+                        </Text>
+                    </View>
 
-                    {/* UPCOMING */}
-                    {dayOrder.map((day) => (
-                        groupedOrders[day] && (
-                            <View key={day}>
-                                <Text style={styles.sectionLabel}>{day.toUpperCase()}</Text>
-                                {groupedOrders[day].map((order) => (
+                    {upcomingOrders.length > 0 ? (
+                        sortedDayLabels.map((dayLabel) => (
+                            <View key={dayLabel}>
+                                <Text style={styles.sectionLabel}>{dayLabel}</Text>
+                                {groupedOrders[dayLabel].map((order) => (
                                     <OrderCard
                                         key={order.id}
-                                        id={order.id} // id -> No Modificar
+                                        id={order.id}
                                         type="upcoming"
                                         vehicleYear={order.vehicleYear}
                                         vehicleBrand={order.vehicleBrand}
                                         vehicleModel={order.vehicleModel}
                                         vehiclePlate={order.vehiclePlate}
                                         vehicleColor={order.vehicleColor}
-                                        ownerName={ACTIVE_ORDER.ownerName} // <-- Agregado, vehicleVIN eliminado
+                                        ownerName={order.ownerName}
                                         services={order.services}
                                         notes={order.notes}
                                         time={order.time}
@@ -112,8 +229,12 @@ export default function OrdersScreen({ navigation }) {
                                     />
                                 ))}
                             </View>
-                        )
-                    ))}
+                        ))
+                    ) : (
+                        <View style={styles.emptyState}>
+                            <Text style={styles.emptyText}>No hay órdenes próximas</Text>
+                        </View>
+                    )}
 
                     <View style={{ height: 120 }} />
                 </ScrollView>
@@ -123,141 +244,24 @@ export default function OrdersScreen({ navigation }) {
     );
 }
 
-const groupOrdersByDay = (orders) => {
-    const groups = {};
-    orders.forEach((order) => {
-        const day = order.dayKey;
-        if (!groups[day]) {
-            groups[day] = [];
-        }
-        groups[day].push(order);
-    });
-    return groups;
-};
-
-const dayOrder = ['HOY', 'MAÑANA', '20/03/2026', '21/03/2026', '22/03/2026'];
-
-const ACTIVE_ORDER = {
-    id: 'active',
-    vehicleYear: '2027',
-    vehicleBrand: 'Honda',
-    vehicleModel: 'Civic',
-    vehiclePlate: 'AB123D',
-    vehicleColor: 'Rojo',
-    ownerName: 'Pedro Maromas', // <-- Agregado
-    vehicleMileage: '10,000 km',
-    time: '09:00 AM',
-    notes: 'Cambio de aceite y revisión general',
-    services: [
-        { id: '1', title: 'Cambio de aceite', status: 'En Progreso' }, // No Modificar -> Cambio: "En Proceso " -> "En progreso"
-        { id: '2', title: 'Revisión de frenos', status: 'Pendiente' },
-    ]
-};
-
-const UPCOMING_ORDERS = [
-    {
-        id: '1',
-        vehicleYear: '2019',
-        vehicleBrand: 'Ford',
-        vehicleModel: 'F-150',
-        vehiclePlate: 'PL-9988',
-        vehicleColor: 'Amarillo',
-        ownerName: 'Maria Silva', // <-- Agregado
-        vehicleMileage: '60,000 km',
-        time: 'HOY, 02:30 PM',
-        dayKey: 'HOY',
-        notes: 'Diagnostico de motor',
-        services: [
-            { id: '1', title: 'Diagnostico de motor', status: 'Pendiente' },
-        ]
-    },
-    {
-        id: '2',
-        vehicleYear: '2022',
-        vehicleBrand: 'Toyota',
-        vehicleModel: 'RAV4',
-        vehiclePlate: 'TX-5544',
-        vehicleColor: 'Blanco',
-        ownerName: 'Carlos Garza', // <-- Agregado
-        vehicleMileage: '70,000 km',
-        time: 'MAÑANA, 09:00 AM',
-        dayKey: 'MAÑANA',
-        notes: 'Servicio de mantenimiento',
-        services: [
-            { id: '1', title: 'Servicio de mantenimiento', status: 'Pendiente' },
-        ]
-    },
-    {
-        id: '3',
-        vehicleYear: '2023',
-        vehicleBrand: 'BMW',
-        vehicleModel: 'X5',
-        vehiclePlate: 'BM-2233',
-        vehicleColor: 'Amarillo camello',
-        ownerName: 'Ana Gomez', // <-- Agregado
-        vehicleMileage: '80,000 km',
-        time: 'MAÑANA, 11:00 AM',
-        dayKey: 'MAÑANA',
-        notes: 'Cambio de aceite',
-        services: [
-            { id: '1', title: 'Cambio de aceite', status: 'Pendiente' },
-        ]
-    },
-    {
-        id: '4',
-        vehicleYear: '2021',
-        vehicleBrand: 'Nissan',
-        vehicleModel: 'Sentra',
-        vehiclePlate: 'NS-8877',
-        vehicleColor: 'Rojo clarito',
-        ownerName: 'Luis Ramirez', // <-- Agregado
-        vehicleMileage: '50,000 km',
-        time: '20/03/2026, 10:00 AM',
-        dayKey: '20/03/2026',
-        notes: 'Revisión de frenos',
-        services: [
-            { id: '1', title: 'Revisión de frenos', status: 'Pendiente' },
-        ]
-    },
-    {
-        id: '5',
-        vehicleYear: '2020',
-        vehicleBrand: 'Chevrolet',
-        vehicleModel: 'Malibu',
-        vehiclePlate: 'CH-4455',
-        vehicleColor: 'Rosa chillon',
-        ownerName: 'Sofia Castro', // <-- Agregado
-        vehicleMileage: '65,000 km',
-        time: '21/03/2026, 02:00 PM',
-        dayKey: '21/03/2026',
-        notes: 'Diagnóstico eléctrico',
-        services: [
-            { id: '1', title: 'Diagnóstico eléctrico', status: 'Pendiente' },
-        ]
-    },
-    {
-        id: '6',
-        vehicleYear: '2022',
-        vehicleBrand: 'Mazda',
-        vehicleModel: 'CX-5',
-        vehiclePlate: 'MZ-1122',
-        vehicleColor: 'Naranja fosfo',
-        ownerName: 'Jorge Perez', // <-- Agregado
-        vehicleMileage: '45,000 km',
-        time: '22/03/2026, 09:30 AM',
-        dayKey: '22/03/2026',
-        notes: 'Alineación y balanceo',
-        services: [
-            { id: '1', title: 'Alineación y balanceo', status: 'Pendiente' },
-        ]
-    },
-];
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#0F1115",
         paddingHorizontal: 18,
+    },
+    sectionRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginTop: 20,
+        marginBottom: 10,
+    },
+    sectionTitle: {
+        color: "#fff",
+        fontSize: 18,
+        fontWeight: "600",
+        marginBottom: 12,
     },
     sectionLabel: {
         color: "#8B90A0",
@@ -277,5 +281,20 @@ const styles = StyleSheet.create({
     emptyText: {
         color: "#777",
         fontSize: 14,
+    },
+    detailsButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: "#FFD43B",
+    },
+    detailsButtonText: {
+        color: "#FFD43B",
+        fontSize: 13,
+        fontWeight: "600",
     },
 });
