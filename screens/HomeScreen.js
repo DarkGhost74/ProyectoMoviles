@@ -259,8 +259,17 @@ const HomeScreen = ({ navigation }) => {
                                 </TouchableOpacity>
                                 <TouchableOpacity 
                                     style={styles.modalAcceptButton}
-                                    onPress={() => {
+                                    onPress={async () => {
                                         setShowLogoutModal(false);
+                                        try {
+                                            await auth.signOut();
+                                            navigation.reset({
+                                                index: 0,
+                                                routes: [{ name: 'Login' }],
+                                            });
+                                        } catch (err) {
+                                            console.error("Error al cerrar sesión:", err);
+                                        }
                                     }}
                                 >
                                     <Text style={styles.modalAcceptText}>Aceptar</Text>
