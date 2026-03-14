@@ -23,6 +23,7 @@ const LastServiceScreen = ({ navigation, route }) => {
         plate,
         vehicleColor,
         vehicleVIN,
+        ownerName,
         service,
         mileage,
         notes,
@@ -103,7 +104,7 @@ const LastServiceScreen = ({ navigation, route }) => {
                         vehicleModel={
                             vehicle ? vehicle.split(" ").slice(2).join(" ") : ""
                         }
-                        owner="Juan Pérez"
+                        owner={ownerName || "Cliente"}
                         color={vehicleColor || "Silver"}
                         plate={plate || "ABC-1234"}
                         mileage={mileage || "45,000 km"}
